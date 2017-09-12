@@ -1,0 +1,12 @@
+build
+dist
+lib
+obj
+examples
+*.swp
+*.pyc
+test/cpp/run*
+test/cpp/.*run
+MANIFEST
+
+
