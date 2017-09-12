@@ -79,13 +79,14 @@ class Dataset(object):
   def load_sparse_dataset(self):
     if not sp.isspmatrix_csc(self.A):
       if self.A.nnz > data_copy_warning_cutoff:
-        message = "Efficiency warning: copying sparse matrix to scipy.sparse.csc_matrix.\n"
-        message += "To avoid copying, provide design matrix as a {} matrix."
+        msg = ("Copying sparse matrix to scipy.sparse.csc_matrix. "
+               "To avoid copying, provide design "
+               "matrix as a {} matrix.")
         try:
-          message = message.format(self.A.best_format)
+          msg = msg.format(self.A.best_format)
         except:
-          message = message.format("CSC")
-        print_if_not_suppressed(message)
+          msg = msg.format("CSC")
+        warn(msg)
       self.A = sp.csc_matrix(self.A, dtype=self.A.dtype)
 
     if self.A.dtype == np.dtype(double_t):
@@ -115,13 +116,13 @@ class Dataset(object):
     if not self.A.flags.f_contiguous:
       nnz = np.prod(self.A.shape)
       if nnz > data_copy_warning_cutoff:
-        message = "Efficiency warning: copying data to F-contiguous array.\n"
-        message += "To avoid copying, pass design matrix in {} format."
+        msg = ("Copying data to F-contiguous array."
+               "To avoid copying, pass design matrix in {} format.")
         try:
-          message = message.format(self.A.best_format)
+          msg = msg.format(self.A.best_format)
         except:
-          message = message.format("F-contiguous")
-        print_if_not_suppressed(message)
+          msg = msg.format("F-contiguous")
+        warn(msg)
       self.A = np.asfortranarray(self.A)
 
     if self.A.dtype == np.dtype(double_t):

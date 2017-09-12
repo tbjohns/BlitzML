@@ -758,7 +758,7 @@ void SparseLinearSolver::fill_result(value_t *result) const {
   }
   result[ind++] = bias;
 
-  // fill in residuals
+  // fill in dual solution
   for (index_t i = 0; i < num_examples; ++i) {
     result[ind++] = y[i];
   }

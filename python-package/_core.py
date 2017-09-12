@@ -115,9 +115,27 @@ for call in new_solver_calls:
 
 _module_vars = {"warnings_suppressed": False}
 
+def add_line_breaks(message, length=0):
+  max_chars = 79
+  result = []
+  for w in message.split():
+    length += len(w) + 1
+    if length > max_chars:
+      result.append("\n")
+      length = len(w) + 1
+    result.append(w + " ")
+  return "".join(result).strip()
+
 def print_if_not_suppressed(message):
   if not _module_vars["warnings_suppressed"]:
+    message = add_line_breaks(message)
     print(message)
+    
+def warn(message):
+  print_if_not_suppressed("Warning: {}".format(message))
+
+def value_error(message):
+  raise ValueError(add_line_breaks(message, length=12))
 
 def suppress_warnings():
   _module_vars["warnings_suppressed"] = True
@@ -132,10 +150,10 @@ def data_as(obj, ctypes_type):
   if obj.dtype != np.dtype(ctypes_type):
     nnz = np.prod(obj.shape)
     if nnz > data_copy_warning_cutoff:
-      message = "Efficiency warning: copying numpy.array of size {:d} from type {} to {}.\n"
-      message += "Refer to documentation for tips on avoiding copying."
-      message = message.format(nnz, obj.dtype, ctypes_type.__name__)
-      print_if_not_suppressed(message)
+      msg = ("Copying numpy.array of size {:d} from type {} to {}. "
+             "Refer to documentation for tips on avoiding copying.")
+      msg = msg.format(nnz, obj.dtype, ctypes_type.__name__)
+      warn(message)
     obj = obj.astype(ctypes_type)
   return (obj, obj.ctypes.data_as(ctypes_type))
 
@@ -407,8 +425,32 @@ def check_log_directory(dir_path):
   if dir_path == "":
     return
   if not os.path.exists(dir_path):
-    print_if_not_suppressed("Warning: provided log directory does not exist")
+    warn("Provided log directory does not exist")
   elif os.listdir(dir_path):
-    print_if_not_suppressed("Warning: starting optimization with non-empty log directory")
+    warn("Starting optimization with non-empty log directory")
+
+
+def check_classification_labels(b, min_b=None, max_b=None):
+  if min_b is None:
+    min_b = min(b)
+  if max_b is None:
+    max_b = max(b)
+  if min_b < -1.0:
+    msg = ("Labels vector conatins values less than -1.0, which is "
+           "unusual. Typically labels are +/-1 for classification.")
+    warn(msg)
+  max_b = max(b)
+  if max_b > 1.0:
+    msg = ("Labels vector conatins values greater than 1.0, which is "
+           "unusual. Typically labels are +/-1 for classification.")
+    warn(msg)
+  if min_b >= 0.:
+    msg = ("Labels vector contains no values less than zero, which is "
+           "unusual. Use -1.0 to label negative training instances.")
+    warn(msg)
+  if max_b <= 0.:
+    msg = ("Labels vector contains no values greater than zero, which is "
+           "unusual. Use 1.0 to label positive training instances.")
+    warn(msg)
 
 

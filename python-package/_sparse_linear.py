@@ -7,8 +7,7 @@ from ._dataset import Dataset
 lib.BlitzML_sparse_linear_solver_compute_max_l1_penalty.argtypes = [pointer_t, pointer_t, pointer_t]
 lib.BlitzML_sparse_linear_solver_compute_max_l1_penalty.restype = value_t
 
-
-class _SparseLinearProblem(Problem):
+class SparseLinearProblem(Problem):
   def __init__(self, A, b):
     """
     Parameters
@@ -38,11 +37,35 @@ class _SparseLinearProblem(Problem):
     BlitzML will print a warning when objects with more than 1e7 elements 
     are begin copied.  To suppress warnings, use blitzml.suppress_warnings(). 
     """
+    self._check_data_inputs(A, b)
     self._dataset = Dataset(A, b) 
     self._set_solver_c()
 
   def _set_solver_c(self):
     self._solver_c_wrap = lib.BlitzML_new_sparse_linear_solver_wrapper()
+
+  def _check_data_inputs(self, A, b):
+    if not sp.isspmatrix(A) and type(A) != np.ndarray:
+      msg = ("Design matrix of type {} not allowed. Type must be "
+             "numpy.ndarray or scipy sparse matrix.").format(type(A).__name__)
+      value_error(msg)
+    if type(b) != np.ndarray:
+      msg = ("Labels vector of type {} not allowed. Type must be "
+             "numpy.ndarray.").format(type(b).__name__)
+      value_error(msg)
+    if A.ndim != 2:
+      msg = ("Design matrix with shape {} not allowed. "
+             "Matrix must be 2d.").format(A.shape)
+      value_error(msg)
+    if b.ndim != 1:
+      msg = ("Labels vector with shape {} not allowed. " 
+             "Labels must be 1d.").format(b.shape)
+      value_error(msg)
+    if A.shape[0] != len(b):
+      msg = ("Dimension mismatch between matrix shape {} and labels shape {}. "
+             "Length of labels vector must equal number of rows in "
+             "design matrix.").format(A.shape, b.shape)
+      value_error(msg)
 
   def compute_max_l1_penalty(self, include_bias_term=True):
     """Compute the smallest l1 regularization penalty for which all weights
@@ -72,7 +95,7 @@ class _SparseLinearProblem(Problem):
 
   def solve(self, l1_penalty, include_bias_term=True, initial_weights=None, 
             stopping_tolerance=1e-3, max_time=3.154e+7, min_time=0., 
-            max_iterations=100000, verbose=False, _log_directory=None):
+            max_iterations=100000, verbose=False, log_directory=None):
     """
     Minimizes the objective
        sum_i L(a_i^T w, b_i) + l1_penalty ||w||_1 ,
@@ -116,7 +139,7 @@ class _SparseLinearProblem(Problem):
       Whether to print information, such as objective value, to stdout during
       optimization.
 
-    _log_directory (optional) : string
+    log_directory (optional) : string
       Path to existing directory for Blitz to log time and objective value 
       information.
 
@@ -148,7 +171,7 @@ class _SparseLinearProblem(Problem):
 
     solution_status_c = self._setup_solution_status()
 
-    log_dir_c = self._set_log_directory(_log_directory)
+    log_dir_c = self._set_log_directory(log_directory)
 
     lib.BlitzML_solve_problem(self._solver_c_wrap.c_pointer, 
                               self._dataset.c_pointer, 
@@ -173,7 +196,7 @@ class _SparseLinearProblem(Problem):
                                 objective_value)
 
 
-class LassoProblem(_SparseLinearProblem):
+class LassoProblem(SparseLinearProblem):
   """Class for training sparse linear models with squared loss.
 
   The optimization objective is
@@ -195,7 +218,7 @@ class LassoProblem(_SparseLinearProblem):
     self._solver_c_wrap = lib.BlitzML_new_lasso_solver_wrapper()
 
 
-class SparseHuberProblem(_SparseLinearProblem):
+class SparseHuberProblem(SparseLinearProblem):
   """Class for training sparse linear models with huber loss.
 
   The optimization objective is
@@ -219,7 +242,7 @@ class SparseHuberProblem(_SparseLinearProblem):
     return 1.
 
 
-class SparseLogisticRegressionProblem(_SparseLinearProblem):
+class SparseLogisticRegressionProblem(SparseLinearProblem):
   """Class for training sparse linear models with logistic loss.
 
   The optimization objective is
@@ -237,11 +260,25 @@ class SparseLogisticRegressionProblem(_SparseLinearProblem):
   def _loss_index(self):
     return 2.
 
+  def _check_data_inputs(self, A, b):
+    SparseLinearProblem._check_data_inputs(self, A, b)
+    min_b = min(b)
+    if min_b < -1.0:
+      msg = ("Labels vector conatins values less than -1.0, which is "
+             "not allowed for sparse logistic regression.")
+      value_error(msg)
+    max_b = max(b)
+    if max_b > 1.0:
+      msg = ("Labels vector contains values greater than 1.0, which is "
+             "not allowed for sparse logistic regression.")
+      value_error(msg)
+    check_classification_labels(b, min_b, max_b)
+
   def _set_solver_c(self):
     self._solver_c_wrap = lib.BlitzML_new_sparse_logreg_solver_wrapper()
 
 
-class SparseSquaredHingeProblem(_SparseLinearProblem):
+class SparseSquaredHingeProblem(SparseLinearProblem):
   """Class for training sparse linear models with squared hinge loss.
 
   The optimization objective is
@@ -261,8 +298,12 @@ class SparseSquaredHingeProblem(_SparseLinearProblem):
   def _loss_index(self):
     return 3.
 
+  def _check_data_inputs(self, A, b):
+    SparseLinearProblem._check_data_inputs(self, A, b)
+    check_classification_labels(b)
 
-class SparseSmoothedHingeProblem(_SparseLinearProblem):
+
+class SparseSmoothedHingeProblem(SparseLinearProblem):
   """Class for training sparse linear models with smoothed hinge loss.
 
   The optimization objective is
@@ -282,6 +323,10 @@ class SparseSmoothedHingeProblem(_SparseLinearProblem):
   @property
   def _loss_index(self):
     return 4.
+
+  def _check_data_inputs(self, A, b):
+    SparseLinearProblem._check_data_inputs(self, A, b)
+    check_classification_labels(b)
 
 
 class LassoSolution(RegressionSolution):

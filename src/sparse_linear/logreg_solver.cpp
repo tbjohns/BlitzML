@@ -7,14 +7,8 @@
 
 namespace BlitzML {
 
+
 void SparseLogRegSolver::initialize_blitz_variables(value_t* initial_conditions) {
-  if (initial_conditions != NULL) {
-    omega.assign(initial_conditions, initial_conditions + num_components);
-  } else {
-    omega.assign(num_components, 0.);
-  }
-  bias = 0.;
-  compute_Aomega();
 
   x.resize(num_examples);
   ATx.resize(num_components);
@@ -23,18 +17,20 @@ void SparseLogRegSolver::initialize_blitz_variables(value_t* initial_conditions)
   y.assign(num_examples, 0.);
   ATy.assign(num_components, 0.);
 
-  if (l0_norm(Aomega) == 0) {
-    exp_bAomega.assign(num_examples, 1);
+  if (initial_conditions != NULL) {
+    omega.assign(initial_conditions, initial_conditions + num_components);
   } else {
-    exp_bAomega.resize(num_examples);
-    const value_t* labels = data->b_values();
-    for (index_t i = 0; i < num_examples; ++i) {
-      exp_bAomega[i] = exp(labels[i] * Aomega[i]);
-    }
+    omega.assign(num_components, 0.);
   }
-  for (index_t i = 0; i < num_examples; ++i) {
-    x[i] = -data->b_value(i) * (1 / (1 + exp_bAomega[i]));
+  bias = 0.;
+
+  initialize_x_variables();
+  value_t max_exp_bAomega = max_vector(exp_bAomega);
+  if (max_exp_bAomega > 1e30) {
+    omega.assign(num_components, 0.);
+    initialize_x_variables();
   }
+
   update_bias(10);
 
   z = x;
@@ -48,6 +44,24 @@ void SparseLogRegSolver::initialize_blitz_variables(value_t* initial_conditions)
     screen_indices_map[i] = i;
   }
 }
+
+void SparseLogRegSolver::initialize_x_variables() {
+  compute_Aomega();
+  if (l0_norm(Aomega) == 0) {
+    exp_bAomega.assign(num_examples, 1);
+  } else {
+    exp_bAomega.resize(num_examples);
+    const value_t* labels = data->b_values();
+    for (index_t i = 0; i < num_examples; ++i) {
+      exp_bAomega[i] = exp(labels[i] * Aomega[i]);
+    }
+  }
+  for (index_t i = 0; i < num_examples; ++i) {
+    x[i] = -data->b_value(i) * (1 / (1 + exp_bAomega[i]));
+  }
+  sum_x = sum_vector(x);
+}
+
 
 void SparseLogRegSolver::update_bias(int max_newton_itr) {
   if (!use_bias) {

@@ -1,6 +1,6 @@
 # coding: utf-8
 
-from blitzml._core import print_if_not_suppressed as print_if_not_suppressed
+from blitzml._core import warn
 
 import os as os
 import numpy as np
@@ -89,10 +89,10 @@ class _LogParser(object):
     self._valid_dir = True
     if not os.path.exists(self._dir):
       self._valid_dir = False
-      print_if_not_suppressed("Warning: log directory not found")
+      warn("Log directory not found.")
     if not os.path.exists(self._main_filepath):
       self._valid_dir = False
-      print_if_not_suppressed("Warning: no main.log found in provided log directory")
+      warn("No main.log found in provided log directory.")
 
   def _set_list_names(self):
     filenames_1 = (n for n in os.listdir(self._dir) if n.endswith(".1.log"))

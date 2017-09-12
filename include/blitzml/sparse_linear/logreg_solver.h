@@ -10,6 +10,7 @@ class SparseLogRegSolver : public SparseLinearSolver {
 
   protected: 
     void initialize_blitz_variables(value_t* initial_conditions);
+    void initialize_x_variables();
     void update_bias(int max_newton_itr=4);
     void perform_backtracking();
     value_t compute_deriv_bias(value_t change) const;
