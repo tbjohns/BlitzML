@@ -57,3 +57,10 @@ a:visited {
   text-decoration: none;
 }
 
+.rst-content tt.literal, .rst-content tt.literal, .rst-content code.literal {
+  color: #693b91;
+}
+
+.wy-menu-vertical li.toctree-l2.current a.internal:hover {
+ background-color: #C4C4C4;
+}

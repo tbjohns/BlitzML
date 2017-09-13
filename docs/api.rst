@@ -1,18 +1,78 @@
-BlitzML python API reference
+BlitzML API reference
 ============================
 
-L1-regularized problems
------------------------
+This is the complete API reference for the BlitzML python package.
 
-.. autoclass:: blitzml.LassoProblem
+Training L1-regularized models
+------------------------------
+
+L1 regularization is a popular approach to training sparse models.  BlitzML
+efficiently solves L1-regularized problems with a variety of loss functions.
+
+Problem classes
+~~~~~~~~~~~~~~~
+
+.. module:: blitzml
+
+.. autoclass:: LassoProblem
   :members:
   :inherited-members: 
 
-.. autoclass:: blitzml.SparseLogisticRegressionProblem
+.. autoclass:: SparseLogisticRegressionProblem
 
-.. autoclass:: blitzml.SparseHuberProblem
+  Calls to ``solve`` and ``compute_max_l1_penalty`` use interfaces identical to
+  the same methods in ``blitzml.LassoProblem``.
 
-.. autoclass:: blitzml.SparseSquaredHingeProblem
+.. autoclass:: SparseHuberProblem
 
-.. autoclass:: blitzml.SparseSmoothedHingeProblem  
+  Calls to ``solve`` and ``compute_max_l1_penalty`` use interfaces identical to
+  those in ``blitzml.LassoProblem``.
+
+.. autoclass:: SparseSquaredHingeProblem
+
+  Calls to ``solve`` and ``compute_max_l1_penalty`` use interfaces identical to
+  those in ``blitzml.LassoProblem``.
+
+.. autoclass:: SparseSmoothedHingeProblem  
+
+Solution classes
+~~~~~~~~~~~~~~~~
+
+.. module:: blitzml._sparse_linear
+
+.. autoclass:: LassoSolution()
+  :inherited-members: 
+  :members:
+
+.. autoclass:: SparseLogisticRegressionSolution()
+  :members:
+
+  Except for the following additional method, interface is identical to 
+  ``LassoSolution``'s interface.
+
+.. autoclass:: SparseHuberSolution()
+
+  Interface is identical to ``LassoSolution``'s interface.
+
+.. autoclass:: SparseSquaredHingeSolution()
+
+  Interface is identical to ``LassoSolution``'s interface.
+
+.. autoclass:: SparseSmoothedHingeSolution()
+
+  Interface is identical to ``LassoSolution``'s interface.
+
+
+Utility functions
+-----------------
+
+.. module:: blitzml
+
+.. autofunction:: load_solution  
+
+.. autofunction:: parse_log_directory
+
+.. autofunction:: suppress_warnings  
+
+.. autofunction:: unsuppress_warnings  
 

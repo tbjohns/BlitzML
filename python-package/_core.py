@@ -138,9 +138,13 @@ def value_error(message):
   raise ValueError(add_line_breaks(message, length=12))
 
 def suppress_warnings():
+  """Stop BlitzML from printing warning messages to sys.stdout. By default, 
+  warning messages are unsuppressed.
+  """
   _module_vars["warnings_suppressed"] = True
 
 def unsuppress_warnings():
+  """Allow BlitzML to print warning messages to sys.stdout."""
   _module_vars["warnings_suppressed"] = False
 
 data_copy_warning_cutoff = 1e7
@@ -150,7 +154,7 @@ def data_as(obj, ctypes_type):
   if obj.dtype != np.dtype(ctypes_type):
     nnz = np.prod(obj.shape)
     if nnz > data_copy_warning_cutoff:
-      msg = ("Copying numpy.array of size {:d} from type {} to {}. "
+      msg = ("Copying numpy.ndarray of size {:d} from type {} to {}. "
              "Refer to documentation for tips on avoiding copying.")
       msg = msg.format(nnz, obj.dtype, ctypes_type.__name__)
       warn(message)
@@ -287,6 +291,14 @@ class Problem(object):
 
 
 class BlitzMLSolution(object):
+  def __init__(self):
+    self._weights = None
+    self._bias = None
+    self._dual_solution = None
+    self._objective_value = None
+    self._duality_gap = None
+    self._solution_status = None
+
   def __init__(self, weights, bias, dual_solution, 
                status, duality_gap, objective_value):
     self._weights = weights
@@ -334,7 +346,9 @@ class BlitzMLSolution(object):
 
   @property
   def duality_gap(self):
-    """Duality gap between primal and dual solutions."""
+    """Duality gap between primal and dual solutions (which upper bounds the
+    suboptimality of these solutions).
+    """
     return self._duality_gap
 
   @duality_gap.setter
@@ -350,13 +364,36 @@ class BlitzMLSolution(object):
   def solution_status(self, value):
     self._solution_status = solution_status
 
+  def compute_loss(self, A, b):
+    """Compute the sum 
+
+    .. math::
+         \sum_i L(a_i^T w, b_i) ,
+
+    where L is the problem's loss function.
+
+    Parameters
+    ----------
+    A : numpy.ndarray or scipy.sparse matrix
+      n x d design matrix for evaluating loss.
+
+    b : numpy.ndarray
+      Corresponding labels array of length n.
+
+    Returns
+    -------
+    loss : float
+    """
+    Aw = self._compute_A_times_weights(A)
+    return self._compute_loss(Aw, b)
+
   def save(self, filepath):
     """Save model to disk.
 
     Parameters
     ----------
     filepath : string
-      Locaiton to save solution.
+      Location to save solution.
     """
     with open(filepath, "wb") as outfile:
       pickle.dump(self, outfile)
@@ -376,11 +413,11 @@ class RegressionSolution(BlitzMLSolution):
     Parameters
     ----------
     A : numpy.ndarray or scipy.sparse matrix
-      n x d design matrix to evaluate predictions for.
+      n x d design matrix to make predictions for.
 
     Returns
     -------
-    predictions : numpy.ndarray of floats
+    predictions : numpy.ndarray of length n.
     """
     return self._compute_A_times_weights(A)
 
@@ -392,11 +429,11 @@ class ClassificationSolution(BlitzMLSolution):
     Parameters
     ----------
     A : numpy.ndarray or scipy.sparse matrix
-      n x d design matrix to evaluate predictions for.
+      n x d design matrix to make predictions for.
 
     Returns
     -------
-    predictions : numpy.ndarray with values +/-1.
+    predictions : numpy.ndarray of length n containing values +/-1.0.
     """
     preds = self._compute_A_times_weights(A)
     preds[preds < 0] = -1.
@@ -410,11 +447,11 @@ def load_solution(filepath):
   Parameters
   ----------
   filepath : string
-    Path to saved BlitzMLSolution.
+    Path to saved solution.
 
   Returns
   -------
-  solution : BlitzMLSolution
+  solution : BlitzMLSolution.
   """
   with open(filepath) as f:
     solution = pickle.load(f)

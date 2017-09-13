@@ -16,6 +16,7 @@ from ._sparse_linear import SparseSquaredHingeProblem
 from ._core import load_solution
 from ._core import suppress_warnings
 from ._core import unsuppress_warnings
+from ._log_parser import parse_log_directory
 
 from ._version import __version__
 

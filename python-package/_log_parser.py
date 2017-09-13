@@ -11,26 +11,21 @@ except ImportError:
   have_pandas = False
 
 
-def parse_log_directory(log_directory, load_vectors=True):
-  """Parse files logged by Blitz during optimization.
+def parse_log_directory(log_directory):
+  """Parse files logged by BlitzML during a solve call.
 
   Parameters
   ----------
   log_directory : string
     Path to directory containing log files to parse.
 
-  load_vectors : bool, optional
-    Whether to parse vectors logged by Blitz. Default is True. 
-    Note that for Blitz to log vectors, problem._log_vectors = True 
-    must be set prior to solving problem.
-
   Returns
   -------
   logs : generator
-    Iterable over information logged by Blitz. Each item is a dictionary
-    of logged values.
+    Iterable over information logged by BlitzML. Each item is a dictionary of
+    logged values.
   """
-  parser = _LogParser(log_directory, load_vectors)
+  parser = _LogParser(log_directory)
   return parser.get_log_points()
 
 
@@ -75,9 +70,8 @@ def load_list_from_file_numpy(path, dtype):
 
 
 class _LogParser(object):
-  def __init__(self, log_directory, load_vectors=True):
+  def __init__(self, log_directory):
     self._dir = log_directory
-    self._load_vectors = load_vectors
     self._set_valid_dir()
     self._set_list_names()
 
@@ -115,8 +109,6 @@ class _LogParser(object):
     yield self._add_vectors(d, log_point_number)
 
   def _add_vectors(self, d, log_point_number):
-    if not self._load_vectors:
-      return d
     for list_name in self._list_names:
       filename = "{}.{:d}.log".format(list_name, log_point_number)
       path = os.path.join(self._dir, filename)

@@ -40,7 +40,7 @@ class SparseLinearProblem(Problem):
       value_error(msg)
 
   def compute_max_l1_penalty(self, include_bias_term=True):
-    """Compute the smallest l1 regularization parameter for which all weights
+    """Compute the smallest L1 penalty parameter for which all weights
     in the solution equal zero.
 
     Parameters
@@ -85,20 +85,15 @@ class SparseLinearProblem(Problem):
 
     include_bias_term : bool, optional
       Whether to include an unregularized bias parameter in the model.  
-      Default is true.
+      Default is True.
 
-    initial_weights : iterable(float) of length A.shape[1], optional
-      Initial weights to warm-start optimization.  The algorithm will 
-      terminate after less time if initialized to a good approximate solution.
+    initial_weights : numpy.ndarray of length d, optional
+      Initial weights to warm-start optimization.  The solver requires
+      less time if initialized to a good approximate solution. Default is None.
 
     stopping_tolerance : float, optional
-      Stopping tolerance for solve.  Optimization terminates if
-
-      .. math::
-
-        \texttt{duality\_gap} / \texttt{objective\_value} 
-                                               < \texttt{stopping\_tolerance} .          
-
+      Stopping tolerance for solver.  Optimization terminates if
+      (duality_gap / objective_value) is less than stopping_tolerance.
       Default is 1e-3.
 
     max_time : float, optional
@@ -116,12 +111,13 @@ class SparseLinearProblem(Problem):
       100000.
 
     verbose : bool, optional
-      Whether to print information, such as objective value, to stdout during
-      optimization.
+      Whether to print information, such as objective value, to sys.stdout 
+      during optimization. Default is False.
 
     log_directory : string, optional
       Path to existing directory for Blitz to log time and objective value 
-      information.
+      information.  This directory should be empty prior to solving. Default
+      is None.
 
       
     Returns
@@ -191,26 +187,25 @@ class LassoProblem(SparseLinearProblem):
     Labels array of length n.
 
 
-  Depending on the formats of A and b, Blitz may make a copy of the data. To
-  avoid data copying, follow these guidelines:
+  Blitz tries its best to avoid copying data, but depending on the formats of A
+  and b, Blitz may make a copy of these arrays. To avoid copying, follow these
+  guidelines:
 
-  * If A is dense (numpy.ndarray), define A as an F-contiguous array.
-    The dtype for A should match ctypes.c_float, ctypes.c_double, or 
-    ctypes.c_int, or ctypes.c_bool--for example, 
-    A.dtype == numpy.dtypes(ctypes.c_double) evaluates to True.
+  * If A is dense (numpy.ndarray), define A as an `F-contiguous array
+    <https://docs.scipy.org/doc/numpy/reference/generated/numpy.asfortranarray.html>`_.
+    The dtype for A should match ctypes.c_double, ctypes.c_float, ctypes.c_int, 
+    or ctypes.c_bool---that is, ``A.dtype == ctypes.c_double`` evaluates to 
+    True, for example.
 
   * If A is sparse, define A as a scipy.sparse.csc_matrix. The dtype for
     A.indices should match type ctypes.c_int. The dtype for A.indptr should
-    match type ctypes.c_size_t. Blitz can work with float, double, int, and
+    match type ctypes.c_size_t. BlitzML can work with double, float, int, and
     bool dtypes for A.data without copying.
-
-  * If the data dtype is some other type, Blitz copies the data to type 
-    float by default.
 
   * The dtype for b should match type ctypes.c_double.
 
-  Blitz will print a warning when objects with more than 1e7 elements 
-  are being copied.  To suppress warnings, use blitzml.suppress_warnings(). 
+  BlitzML will print a warning when objects with more than 1e7 elements 
+  are being copied.  To suppress warnings, use ``blitzml.suppress_warnings()``. 
   """
 
   @property
@@ -263,7 +258,8 @@ class SparseLogisticRegressionProblem(SparseLinearProblem):
 
     \sum_i \log(1 + \exp(-b_i a_i^T w)) + \lambda ||w||_1 ,
 
-  where i indexes the ith row in A and ith entry in b.
+  where i indexes the ith row in A and ith entry in b.  Each label should have
+  value 1, -1, or somewhere in between.
   """
   @property
   def _solution_class(self):
@@ -299,7 +295,8 @@ class SparseSquaredHingeProblem(SparseLinearProblem):
 
     \sum_i \onehalf (1 - b_i a_i^T w)_+^2 + \lambda ||w||_1 ,
 
-  where the "+" subscript denotes the rectifier function.
+  where the "+" subscript denotes the rectifier function.  Each label should 
+  have value 1 or -1.
   """
   @property
   def _solution_class(self):
@@ -332,6 +329,8 @@ class SparseSmoothedHingeProblem(SparseLinearProblem):
       \onehalf (1 - b_i a_i^T w)^2 && \text{if}\ b_i a_i^T w \in [0,1) \\[0.4em]
       0                            && \text{otherwise.} 
     \end{array} \right.
+
+  Each label should have value 1 or -1.
   """
   @property
   def _solution_class(self):
@@ -347,59 +346,18 @@ class SparseSmoothedHingeProblem(SparseLinearProblem):
 
 
 class LassoSolution(RegressionSolution):
-  """Solution object for LassoProblem."""
+  """Solution class for ``LassoProblem``."""
 
-  def evaluate_loss(self, A, b):
-    """Computes the value
-         sum_i L(a_i^T w, b_i) ,
-
-    where L(a_i^T w, b_i) = 0.5 * (a_i^T w - b_i)^2 .
-
-    Parameters
-    ----------
-    A : numpy.ndarray or scipy.sparse matrix
-      n x d design matrix for evaluating loss.
-
-    b : numpy.ndarray
-      Labels array with length d for evaluating loss.
-
-    Returns
-    -------
-    loss : float
-    """
-    Aw = self._compute_A_times_weights(A)
+  def _compute_loss(self, Aw, b):
     loss = 0.5 * np.linalg.norm(Aw - b) ** 2
     return loss
 
 
 class SparseHuberSolution(RegressionSolution):
-  """Solution object for SparseHuberProblem.
-  """
-  def evaluate_loss(self, A, b):
-    """Computes the value
-         sum_i L(a_i^T w, b_i) ,
-
-    To define L in this case, define r_i = b_i - a_i^T w.  Then
-
-      L(a_i^T w, b_i) = 
-          0.5 (r_i)^2   if |r_i| < 1,  
-          r_i - 0.5     if r_i >= 1,
-          -r_i - 0.5    otherwise.
-
-    Parameters
-    ----------
-    A : numpy.ndarray or scipy.sparse matrix
-      n x d design matrix for evaluating loss.
-
-    b : numpy.ndarray
-      Labels array for evaluating loss.
-
-    Returns
-    -------
-    loss : float
-    """
+  """Solution class for ``SparseHuberProblem``."""
+  def _compute_loss(self, Aw, b):
     width = 1.
-    residuals = self._compute_A_times_weights(A) - b
+    residuals = Aw - b
     one_half_width_sq = 0.5 * width ** 2
     
     left = np.sum(-width * residuals[residuals < -width] - one_half_width_sq)
@@ -414,88 +372,41 @@ class SparseHuberSolution(RegressionSolution):
 
 
 class SparseLogisticRegressionSolution(ClassificationSolution):
-  """Solution object for SparseLogisticRegressionProblem.
-  """
+  """Solution class for ``SparseLogisticRegressionProblem``."""
   def predict_probabilities(self, A):
+    """Predict probability values from feature vectors.
+
+    Parameters
+    ----------
+    A : numpy.ndarray or scipy.sparse matrix
+      n x d design matrix to predict probabilities for.
+
+    Returns
+    -------
+    predicted_probabilities : numpy.ndarray (length n with values in [0, 1]).
+    """
     Aw = self._compute_A_times_weights(A)
     probs = 1 / (1 + np.exp(-Aw))
     return probs
 
-  def evaluate_loss(self, A, b):
-    """Computes the value
-         sum_i L(a_i^T w, b_i) ,
-
-    where L(a_i^T w, b_i) = log(1 + exp(-b_i a_i^T w)).
-
-    Parameters
-    ----------
-    A : numpy.ndarray or scipy.sparse matrix
-      n x d design matrix for evaluating loss.
-
-    b : numpy.ndarray
-      Labels array for evaluating loss.
-
-    Returns
-    -------
-    loss : float
-    """
-    bAw = b * self._compute_A_times_weights(A)
-    return np.sum(np.log1p(np.exp(-bAw)))
+  def _compute_loss(self, Aw, b):
+    return np.sum(np.log1p(np.exp(-b * Aw)))
 
 
 class SparseSquaredHingeSolution(ClassificationSolution):
-  """Solution object for SparseSquaredHingeProblem.
-  """
-  def evaluate_loss(self, A, b):
-    """Computes the value
-         sum_i L(a_i^T w, b_i) ,
+  """Solution class for ``SparseSquaredHingeProblem``.  """
 
-    where L(a_i^T w, b_i) = 
-            0.5 (1 - b_i a_i^T w)^2   if  b_i a_i^T w < 1,
-            0                         otherwise.
-
-    Parameters
-    ----------
-    A : numpy.ndarray or scipy.sparse matrix
-      n x d design matrix for evaluating loss.
-
-    b : numpy.ndarray
-      Labels array for evaluating loss.
-
-    Returns
-    -------
-    loss : float
-    """
-    loss_terms = 1 - b * self._compute_A_times_weights(A)
+  def _compute_loss(self, Aw, b):
+    loss_terms = 1 - b * Aw
     loss_terms[loss_terms < 0] = 0.
     return 0.5 * np.sum(loss_terms ** 2)
 
 
 class SparseSmoothedHingeSolution(ClassificationSolution):
-  """Solution object for SparseSmoothedHingeProblem.
-  """
-  def evaluate_loss(self, A, b):
-    """Computes the value
-         sum_i L(a_i^T w, b_i) ,
+  """Solution class for ``SparseSquaredHingeProblem``.  """
 
-    where L(a_i^T w, b_i) = 
-            0.5 - b_i a_i^T w         if b_i a_i^T w < 0,
-            0.5 (1 - b_i a_i^T w)^2   if  0 <= b_i a_i^T w < 1,
-            0                         otherwise.
-
-    Parameters
-    ----------
-    A : numpy.ndarray or scipy.sparse matrix
-      n x d design matrix for evaluating loss.
-
-    b : numpy.ndarray
-      Labels array for evaluating loss.
-
-    Returns
-    -------
-    loss : float
-    """
-    loss_terms = 1 - b * self._compute_A_times_weights(A)
+  def _compute_loss(self, Aw, b):
+    loss_terms = 1 - b * Aw
     loss_terms[loss_terms < 0] = 0.
     squared_examples = (loss_terms < 1)
     squared_loss = 0.5 * np.sum(loss_terms[squared_examples] ** 2)
