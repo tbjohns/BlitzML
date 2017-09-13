@@ -19,7 +19,7 @@ def parse_log_directory(log_directory, load_vectors=True):
   log_directory : string
     Path to directory containing log files to parse.
 
-  load_vectors (optional) : bool
+  load_vectors : bool, optional
     Whether to parse vectors logged by Blitz. Default is True. 
     Note that for Blitz to log vectors, problem._log_vectors = True 
     must be set prior to solving problem.

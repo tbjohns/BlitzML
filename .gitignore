@@ -8,5 +8,8 @@ examples
 test/cpp/run*
 test/cpp/.*run
 MANIFEST
-
+docs/Makefile
+docs/_build
+docs/_templates
+docs/*.log
 

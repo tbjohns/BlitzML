@@ -116,7 +116,7 @@ class Dataset(object):
     if not self.A.flags.f_contiguous:
       nnz = np.prod(self.A.shape)
       if nnz > data_copy_warning_cutoff:
-        msg = ("Copying data to F-contiguous array."
+        msg = ("Copying data to F-contiguous array. "
                "To avoid copying, pass design matrix in {} format.")
         try:
           msg = msg.format(self.A.best_format)

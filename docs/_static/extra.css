@@ -1,0 +1,59 @@
+.icon-home::before {
+  content:"\f0e7";
+}
+
+.wy-side-nav-search {
+  background-color: #293a5b;
+}
+
+.wy-menu-vertical li.current>a {
+  background-color: #EFEFEF;
+}
+
+.wy-menu-vertical a:active {
+  background-color: #293a5b;
+}
+
+.wy-side-nav-search input[type=text] { 
+  border-color: #DDD;
+}
+
+.rst-content dl:not(.docutils) dt {
+  color: #293a5b;
+  border-top: solid 3px #6889c9;
+  background: #e8edf7;
+}
+
+.rst-content dl:not(.docutils) dt:before {
+    color: #6889c9;
+}
+
+a {
+  color: #4061a0;
+}
+
+a:hover {
+  color: #4061a0;
+  text-decoration: underline;
+}
+
+a:visited {
+  color: #4061a0;
+}
+
+.wy-menu-vertical a,
+.wy-menu-vertical a:visited,
+.wy-menu-vertical a:hover {
+  color: #d0d0d0;
+}
+
+.wy-side-nav-search a, 
+.wy-side-nav-search .wy-dropdown,
+.wy-side-nav-search a:visited, 
+.wy-side-nav-search .wy-dropdown a:visited,
+.wy-side-nav-search a:hover, 
+.wy-side-nav-search .wy-dropdown a:hover {
+  color: #fcfcfc;
+  text-decoration: none;
+}
+
