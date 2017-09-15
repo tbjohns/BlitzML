@@ -10,6 +10,16 @@ namespace BlitzML {
 
 void SparseLogRegSolver::initialize_blitz_variables(value_t* initial_conditions) {
 
+  is_positive_label.assign(num_examples, false);
+  const value_t* labels = data->b_values();
+  index_t num_positive = 0;
+  for (index_t j = 0; j < num_examples; ++j) {
+    if (labels[j] >= 0.) {
+      is_positive_label[j] = true;
+      ++num_positive;
+    }
+  }
+
   x.resize(num_examples);
   ATx.resize(num_components);
   kappa_x = 1.;
@@ -24,6 +34,20 @@ void SparseLogRegSolver::initialize_blitz_variables(value_t* initial_conditions)
   }
   bias = 0.;
 
+  problem_is_degenerate = false;
+  if (use_bias) {
+    if (num_positive == 0) {
+      problem_is_degenerate = true;
+      bias = -100.;
+    } else if (num_positive == num_examples) {
+      problem_is_degenerate = true;
+      bias = 100.;
+    }
+    if (problem_is_degenerate) {
+      omega.assign(num_components, 0.);
+    }
+  }
+
   initialize_x_variables();
   value_t max_exp_bAomega = max_vector(exp_bAomega);
   if (max_exp_bAomega > 1e30) {
@@ -31,7 +55,7 @@ void SparseLogRegSolver::initialize_blitz_variables(value_t* initial_conditions)
     initialize_x_variables();
   }
 
-  update_bias(10);
+  update_bias(25);
 
   z = x;
   ATz.assign(num_components, 0.);
@@ -64,60 +88,93 @@ void SparseLogRegSolver::initialize_x_variables() {
 
 
 void SparseLogRegSolver::update_bias(int max_newton_itr) {
-  if (!use_bias) {
+  if (!use_bias || problem_is_degenerate) {
     return;
   }
-  value_t change = 0;
-  value_t deriv = compute_deriv_bias(change);
-  value_t hess = compute_hess_bias(change) + 1e-12;
-  for (int newton_itr = 0; newton_itr < max_newton_itr; ++newton_itr) {
-    value_t delta = -deriv / hess;
 
-    int backtrack_itr = 0;
-    while (++backtrack_itr) {
-      value_t new_deriv = compute_deriv_bias(change + delta);
-      if (-deriv * new_deriv < 0.5 * sq(deriv)) {
-        deriv = new_deriv;
-        break;
+  // Convert exp_bAomega to exp_minus_Aomega:
+  value_t pos_count = 0;
+  for (index_t j = 0; j < num_examples; ++j) {
+    if (is_positive_label[j]) {
+      exp_bAomega[j] = 1 / exp_bAomega[j];
+      if (exp_bAomega[j] > 1e30 || exp_bAomega[j] != exp_bAomega[j]) {
+        exp_bAomega[j] = exp(-Aomega[j]);
       }
-      delta *= 0.5;
-      if (backtrack_itr == 3) {
-        delta = 0.;
-        break;
-      }
-    } 
-    change += delta;
-
-    if (delta == 0.) {
-      break;
+      pos_count += 1.0;
     }
   }
 
+  // Special case closed-form solution:
+  // (this case occurs when we initialize model as all zeros)
+  value_t exp_delta_total = 1.0;  
+  if (is_vector_const(exp_bAomega, 1e-8)) {
+    exp_delta_total = pos_count / (num_examples - pos_count) / exp_bAomega[0];
+    scale_vector(exp_bAomega, 1/exp_delta_total);
+    max_newton_itr = 0;
+  }
+
+  int sign_last_deriv = 0;
+  for (int itr = 0; itr < max_newton_itr; ++itr) {
+    // Compute derivative:
+    value_t sum_p = 0.;
+    value_t h = 0.;
+    for (index_t j = 0; j < num_examples; ++j) {
+      value_t p = 1.0 / (1 + exp_bAomega[j]);
+      sum_p += p;
+      h += p * (1 - p);
+    }
+
+    // Check stopping condition
+    value_t deriv = pos_count - sum_p;
+    if (deriv == 0.) {
+      break;
+    } else {
+      sign_last_deriv = sign(deriv);
+    }
+
+    // Choose update:
+    value_t exp_delta = 1 + deriv / h;
+    if (exp_delta < 0.1) {
+      exp_delta = pos_count / sum_p;
+    }
+
+    // Apply update:
+    exp_delta_total *= exp_delta;
+    value_t exp_delta_inv = 1 / exp_delta;
+    for (index_t j = 0; j < num_examples; ++j) {
+      exp_bAomega[j] *= exp_delta_inv;
+    }
+  }
+
+  value_t change = log(exp_delta_total);
   bias += change;
   
-  value_t exp_change = exp(change);
-  value_t inv_exp_change = 1 / exp_change;
-  const value_t* labels = data->b_values();
-  int count = 0;
-  for (index_t i = 0; i < num_examples; ++i) {
-    Aomega[i] += change;
-    value_t label = labels[i];
-    if (label == -1) {
-      exp_bAomega[i] *= inv_exp_change;
-    } else if (label == 1) {
-      exp_bAomega[i] *= exp_change;
+  sum_x = 0.;
+  for (index_t j = 0; j < num_examples; ++j) {
+    Aomega[j] += change;
+    if (is_positive_label[j]) {
+      exp_bAomega[j] = 1 / exp_bAomega[j];
+      if (exp_bAomega[j] > 1e30 || exp_bAomega[j] != exp_bAomega[j]) {
+        exp_bAomega[j] = exp(Aomega[j]);
+      }
+      x[j] = -(1 / (1 + exp_bAomega[j]));
     } else {
-      exp_bAomega[i] = exp(label * Aomega[i]);
-      ++count;
+      if (exp_bAomega[j] > 1e30 || exp_bAomega[j] != exp_bAomega[j]) {
+        exp_bAomega[j] = exp(-Aomega[j]);
+      }
+      x[j] = (1 / (1 + exp_bAomega[j]));
     }
-
-    x[i] = -label * (1 / (1 + exp_bAomega[i]));
+    sum_x += x[j];
   }
-  sum_x = sum_vector(x);
   z_match_x = false;
 }
 
+
 void SparseLogRegSolver::perform_backtracking() {
+  if (problem_is_degenerate) {
+    return;
+  }
+
   std::vector<value_t> low_exp_bAomega = exp_bAomega;
 
   sum_x = 0.;
@@ -154,7 +211,7 @@ void SparseLogRegSolver::perform_backtracking() {
       value_t deriv = compute_backtracking_step_size_derivative(step_size);
       if (backtrack_itr >= 5 && deriv < 0) {
         break;
-      } else if (backtrack_itr >= 20) {
+      } else if (backtrack_itr >= 15) {
         break;
       }
 
@@ -178,54 +235,6 @@ void SparseLogRegSolver::perform_backtracking() {
   for (index_t i = 0; i < num_examples; ++i) {
     Aomega[i] += step_size * Delta_Aomega[i] + Delta_bias;
   }
-}
-
-
-value_t SparseLogRegSolver::compute_deriv_bias(value_t change) const {
-  value_t deriv = 0.;
-  value_t exp_change = exp(change);
-  value_t inv_exp_change = 1 / exp_change;
-  const value_t* b_values = data->b_values();
-
-  for (index_t i = 0; i < num_examples; ++i) {
-    value_t label = b_values[i];
-    value_t exp_bAomega_i = exp_bAomega[i];
-    if (label == -1) {
-      exp_bAomega_i *= inv_exp_change;
-    } else if (label == 1) {
-      exp_bAomega_i *= exp_change;
-    } else {
-      exp_bAomega_i *= exp(label * change);
-    }
-
-    value_t prob = 1 / (1 + exp_bAomega_i);
-    deriv -= label * prob;
-  }
-  return deriv;
-}
-
-
-value_t SparseLogRegSolver::compute_hess_bias(value_t change) const {
-
-  value_t hess = 0.;
-
-  value_t exp_change = exp(change);
-  value_t inv_exp_change = 1 / exp_change;
-  const value_t* b_values = data->b_values();
-  for (index_t i = 0; i < num_examples; ++i) {
-    value_t label = b_values[i];
-    value_t exp_bAomega_i = exp_bAomega[i];
-    if (label == -1) {
-      exp_bAomega_i *= inv_exp_change;
-    } else if (label == 1) {
-      exp_bAomega_i *= exp_change;
-    } else {
-      exp_bAomega_i *= exp(label * change);
-    }
-    value_t prob = 1 / (1 + exp_bAomega_i);
-    hess += sq(label) * prob * (1 - prob);
-  }
-  return hess;
 }
 
 

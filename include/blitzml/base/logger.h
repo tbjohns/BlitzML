@@ -57,6 +57,9 @@ class Logger {
       log_file.close();
     }
 
+    bool suppress_warnings() const { return suppress_warnings_; }
+    void set_suppress_warnings(bool value) { suppress_warnings_ = value; }
+
 
   private:
     mutable std::ofstream main_log_file;
@@ -66,6 +69,7 @@ class Logger {
     double last_log_time;
     unsigned num_points_logged;
     bool directory_is_valid;
+    bool suppress_warnings_;
 
     const std::string get_filepath(const std::string &name) const;
     const std::string get_main_log_filepath() const;

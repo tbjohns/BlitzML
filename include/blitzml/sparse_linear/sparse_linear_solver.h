@@ -82,7 +82,7 @@ class SparseLinearSolver : public Solver {
     void set_max_and_min_num_cd_itr(int &max_num_cd_itr, int &min_num_cd_itr) const;
     void update_kappa_x();
     value_t compute_cd_threshold() const;
-    virtual void update_bias(int max_newton_itr=4);
+    virtual void update_bias(int max_newton_itr=5);
     virtual void update_bias_subproblem();
     value_t perform_newton_update_on_bias();
     value_t compute_backtracking_step_size_derivative(value_t step_size) const;

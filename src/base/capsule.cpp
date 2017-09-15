@@ -6,10 +6,10 @@ namespace BlitzML {
 
 CapsuleCalculator::CapsuleCalculator(value_t gamma, value_t Delta, value_t d_sq) 
                 : gamma(gamma), Delta(Delta) { 
-  warn_if(Delta <= -1e-7, "capsule calculations assume Delta > 0");
-  warn_if(d_sq < 0, "capsule calculations assume d_sq >= 0");
+  if (Delta < 0.) Delta = 0.;
+  if (d_sq < 0.) d_sq = 0.;
 
-  r = gamma * d_sq / Delta / 2;
+  r = (Delta != 0.) ? gamma * d_sq / Delta / 2 : 0.;
   d = sqrt(d_sq);
 }
 
@@ -54,7 +54,7 @@ value_t CapsuleCalculator::compute_tau(value_t beta, value_t xi, int shift_term_
 
 value_t CapsuleCalculator::compute_deriv_tau(value_t beta, value_t xi, 
                               int shift_term_multiplier) {
-  value_t min_deriv = 1e-6;
+  value_t min_deriv = 1e-12;
   if (beta == 0.)
     return min_deriv;
   if (beta == 0.5) {
@@ -91,7 +91,6 @@ value_t CapsuleCalculator::compute_max_tau(value_t xi, int shift_term_multiplier
     }
   }
 
-  // Return upper bound on solution using log convexity:
   value_t value_below = compute_tau(beta_below, xi, shift_term_multiplier);
   if (value_below <= 0.) {
     return 0;

@@ -4,6 +4,7 @@ import numpy as np
 from scipy import sparse as sp
 
 from common import matrix_vector_product
+from common import captured_output
 
 
 def is_solution(sol, A, b, lam, tol=1e-3):
@@ -19,6 +20,10 @@ def is_solution(sol, A, b, lam, tol=1e-3):
   if len(neg_grads_diff) and max(abs(neg_grads_diff)) > lam * tol:
     return False
   return True
+
+
+def compute_dual_objective(theta, b):
+  return -0.5 * np.linalg.norm(theta) ** 2 - np.dot(theta, b)
 
 
 class TestLasso_1_by_1(unittest.TestCase):
@@ -50,12 +55,12 @@ class TestLasso_1_by_1(unittest.TestCase):
 class TestLassoEmpty(unittest.TestCase):
   def test_lasso_empty(self): 
     A = sp.csc_matrix((100, 1000))
-    b = np.zeros(100)
+    b = np.ones(100)
     prob = blitzml.LassoProblem(A, b)
     self.assertEqual(prob.compute_max_l1_penalty(), 0.)
     sol = prob.solve(0.)
     self.assertEqual(np.linalg.norm(sol.weights), 0.)
-    self.assertEqual(sol.bias, 0.)
+    self.assertEqual(sol.bias, 1.0)
     self.assertEqual(sol.objective_value, 0.)
     self.assertEqual(sol.duality_gap, 0.)
 
@@ -99,6 +104,60 @@ class TestLassoInitialConditions(unittest.TestCase):
     sol0 = prob.solve(lam, stopping_tolerance=1e-5)
     sol = prob.solve(lam, initial_weights=sol0.weights, max_time=-1.0)
     self.assertEqual(is_solution(sol, A, b, lam), True)
+
+
+class TestLassoObjectives(unittest.TestCase):
+  def setUp(self):
+    np.random.seed(1) 
+    self.A = np.random.uniform(0, 1, size=(20, 10))
+    self.b = np.random.uniform(0, 1, size=20)
+    prob = blitzml.LassoProblem(self.A, self.b)
+    self.lam = 0.02 * prob.compute_max_l1_penalty()
+    self.sol = prob.solve(self.lam) 
+
+  def test_lasso_compute_loss(self):
+    d = self.A.shape[1]
+    A = np.zeros((0, d))
+    b = np.zeros(0)
+    self.assertEqual(self.sol.compute_loss(A, b), 0.)
+
+    A = np.random.randn(1, d)
+    b = np.random.randn(1, 1)
+    Aw = np.dot(A[0,:], self.sol.weights) + self.sol.bias
+    loss = 0.5 * (Aw - b[0]) ** 2
+    self.assertEqual(self.sol.compute_loss(A, b), loss)
+
+  def test_lasso_primal_objective(self):
+    l1_norm = np.linalg.norm(self.sol.weights, ord=1)
+    obj = self.sol.compute_loss(self.A, self.b) + self.lam * l1_norm
+    self.assertAlmostEqual(obj, self.sol.objective_value)
+
+  def test_lasso_dual_solution(self):
+    dual_obj = compute_dual_objective(self.sol.dual_solution, self.b)
+    sol_dual_obj = self.sol.objective_value - self.sol.duality_gap
+    self.assertAlmostEqual(dual_obj, sol_dual_obj)  
+
+  def test_lasso_predict(self):
+    d = self.A.shape[1]
+    A = np.random.randn(2, d)
+    Aw = np.dot(A, self.sol.weights) + self.sol.bias
+    diff = np.linalg.norm(Aw - self.sol.predict(A))
+    self.assertEqual(diff, 0.)  
+    
+class TestLassoLambdaMax(unittest.TestCase):
+  def test_sparse_linear_lambda_max_basic(self):
+    A = np.array([[1, -2], [1, 0]]).T
+    b = np.array([3, -1])
+    prob = blitzml.LassoProblem(A, b)
+    lammax = prob.compute_max_l1_penalty()
+    self.assertEqual(lammax, 6.0)
+    lammax2 = prob.compute_max_l1_penalty(include_bias_term=False)
+    self.assertEqual(lammax2, 5.0)
+
+
+
+
+
 
 
 

@@ -2,6 +2,8 @@ import unittest
 import blitzml
 import numpy as np
 
+from common import captured_output
+
 class TestProblemOptions(unittest.TestCase):
   def setUp(self):
     A = np.arange(20).reshape(5, 4)
@@ -47,4 +49,20 @@ class TestProblemOptions(unittest.TestCase):
     self.assertEqual(self.prob._use_working_sets, True)
     self.prob._use_working_sets = False
     self.assertEqual(self.prob._use_working_sets, False)
+
+  def test_suppress_warnings(self):
+    bad_log_dir = "path/to/bad_log/dir/zxc8aj3n"
+    with captured_output() as out:
+      self.prob.solve(self.prob.compute_max_l1_penalty(),
+                      log_directory=bad_log_dir)
+    self.assertIn("Warning", out[0])
+
+    blitzml.suppress_warnings()
+
+    with captured_output() as out:
+      self.prob.solve(self.prob.compute_max_l1_penalty(),
+                      log_directory=bad_log_dir)
+    self.assertNotIn("Warning", out[0])
+
+    blitzml.unsuppress_warnings()
 

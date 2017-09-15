@@ -21,6 +21,7 @@ void Solver::solve(const Dataset *data, const Parameters *params,
                    value_t *result, char *status_message,
                    const char *log_directory) {
   solver_timer.reset();
+  solver_logger.set_suppress_warnings(suppress_warnings());
   solver_logger.set_log_directory(log_directory);
   solver_logger.throttle_logging_with_interval(max_time() / 100);
 

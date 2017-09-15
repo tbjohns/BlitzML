@@ -77,6 +77,8 @@ lib.BlitzML_use_working_sets.restype = bool_t
 lib.BlitzML_use_working_sets.argtypes = []
 lib.BlitzML_set_log_vectors.restype = None
 lib.BlitzML_set_log_vectors.argtypes = [pointer_t, bool_t]
+lib.BlitzML_set_suppress_warnings.restype = None
+lib.BlitzML_set_suppress_warnings.argtypes = [pointer_t, bool_t]
 lib.BlitzML_log_vectors.restype = bool_t
 lib.BlitzML_log_vectors.argtypes = []
 lib.BlitzML_set_max_iterations.restype = None
@@ -171,6 +173,9 @@ class Problem(object):
   def _set_solver_options(self, **kwargs):
     for k, v in kwargs.items():
       setattr(self, "_{}".format(k), v)
+    suppress_warnings_ = _module_vars["warnings_suppressed"]
+    lib.BlitzML_set_suppress_warnings(self._solver_c_wrap.c_pointer, 
+                                      bool_t(suppress_warnings_))
 
   def _set_parameters(self, parameters):
     num_params_c = size_t(len(parameters))
@@ -291,14 +296,6 @@ class Problem(object):
 
 
 class BlitzMLSolution(object):
-  def __init__(self):
-    self._weights = None
-    self._bias = None
-    self._dual_solution = None
-    self._objective_value = None
-    self._duality_gap = None
-    self._solution_status = None
-
   def __init__(self, weights, bias, dual_solution, 
                status, duality_gap, objective_value):
     self._weights = weights
@@ -467,27 +464,34 @@ def check_log_directory(dir_path):
     warn("Starting optimization with non-empty log directory")
 
 
-def check_classification_labels(b, min_b=None, max_b=None):
-  if min_b is None:
-    min_b = min(b)
-  if max_b is None:
-    max_b = max(b)
+def check_classification_labels(dataset):
+  min_b = dataset.min_b
+  max_b = dataset.max_b
   if min_b < -1.0:
     msg = ("Labels vector conatins values less than -1.0, which is "
            "unusual. Typically labels are +/-1 for classification.")
     warn(msg)
-  max_b = max(b)
   if max_b > 1.0:
     msg = ("Labels vector conatins values greater than 1.0, which is "
            "unusual. Typically labels are +/-1 for classification.")
     warn(msg)
+  if min_b == 0.0 and max_b == 0.0:
+    msg = "Labels vector contains only zero values."
+    warn(msg)
+    return
   if min_b >= 0.:
     msg = ("Labels vector contains no values less than zero, which is "
-           "unusual. Use -1.0 to label negative training instances.")
+           "unusual. Use -1 to label negative training instances.")
     warn(msg)
   if max_b <= 0.:
     msg = ("Labels vector contains no values greater than zero, which is "
-           "unusual. Use 1.0 to label positive training instances.")
+           "unusual. Use 1 to label positive training instances.")
     warn(msg)
 
+def check_regression_labels(dataset):
+  min_b = dataset.min_b
+  max_b = dataset.max_b
+  if min_b == 0.0 and max_b == 0.0:
+    msg = "Labels vector contains only zero values."
+    warn(msg)
 

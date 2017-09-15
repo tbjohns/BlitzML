@@ -12,7 +12,8 @@ Logger::Logger() :
       log_directory(""),
       min_time_interval(0.),
       last_log_time(0.),
-      num_points_logged(0) { } 
+      num_points_logged(0),
+      suppress_warnings_(false) { } 
 
 
 void Logger::close_files() {
@@ -66,7 +67,7 @@ bool Logger::log_new_point(double elapsed_time, value_t obj, bool force_no_throt
 void Logger::open_log_file(ofstream &log_file, const string &path) const {
   log_file.open(path.c_str());
   log_file.precision(15);
-  warn_if(log_file.fail(), file_error_message(path));
+  warn_if(log_file.fail() && !suppress_warnings(), file_error_message(path));
 }
 
 

@@ -14,6 +14,7 @@ value_t SquaredHingeLoss::compute_loss(value_t a_dot_omega, value_t label) const
 
 value_t SquaredHingeLoss::compute_conjugate(value_t dual_variable, 
                                         value_t label) const {
+  if (label == 0.) return -0.5;
   value_t one_plus_ratio = 1 + dual_variable / label;
   return (sq(one_plus_ratio) - 1) / 2;
 }

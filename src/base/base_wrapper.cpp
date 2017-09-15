@@ -130,4 +130,16 @@ bool BlitzML_log_vectors(Solver *solver) {
 }
 
 
+LIBRARY_API
+void BlitzML_set_suppress_warnings(Solver *solver, bool value) {
+  solver->set_suppress_warnings(value);
+}
+
+
+LIBRARY_API
+bool BlitzML_suppress_warnings(Solver *solver) {
+  return solver->suppress_warnings();
+}
+
+
 } // namespace BlitzML

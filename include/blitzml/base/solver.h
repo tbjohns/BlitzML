@@ -22,7 +22,8 @@ class Solver {
       verbose_(false),
       use_screening_(true),
       use_working_sets_(true),
-      log_vectors_(false)
+      log_vectors_(false),
+      suppress_warnings_(false)
     { }
 
     virtual ~Solver() { debug("delete solver"); }
@@ -49,6 +50,8 @@ class Solver {
     bool use_working_sets() const { return use_working_sets_; }
     void set_log_vectors(bool val) { log_vectors_ = val; }
     bool log_vectors() const { return log_vectors_; }
+    void set_suppress_warnings(bool val) { suppress_warnings_ = val; }
+    bool suppress_warnings() const { return suppress_warnings_; }
 
 
   protected:
@@ -140,6 +143,7 @@ class Solver {
     bool use_screening_;
     bool use_working_sets_;
     bool log_vectors_;
+    bool suppress_warnings_;
 
 
     void initialize_priority_vectors();

@@ -283,11 +283,10 @@ void SparseLinearSolver::update_bias(int max_newton_itr) {
   }
 
   Delta_Aomega.assign(num_examples, 0.);
-  Delta_bias = 0.;
 
   for (int newton_itr = 0; newton_itr < max_newton_itr; ++newton_itr) {
     value_t change = perform_newton_update_on_bias();
-    if (fabs(change) < 1e-14) {
+    if (fabs(change) == 0.0) {
       return;
     }
   }
@@ -295,11 +294,14 @@ void SparseLinearSolver::update_bias(int max_newton_itr) {
 
 
 value_t SparseLinearSolver::perform_newton_update_on_bias() {
-  update_newton_2nd_derivatives(1e-8);
-  Delta_bias = -sum_x / sum_newton_2nd_derivatives;
+  update_newton_2nd_derivatives();
+  Delta_bias = (sum_newton_2nd_derivatives > 0) ? 
+                  -sum_x / sum_newton_2nd_derivatives : -100 * sign(sum_x);
+  Delta_bias = (fabs(Delta_bias) < 100) ? Delta_bias : 100 * sign(Delta_bias);
+
   value_t step_size = 1.;
   unsigned backtrack_itr = 0;
-  while (backtrack_itr < 10) {
+  while (++backtrack_itr <= 6) {
     update_x(step_size);
     if (sum_x * Delta_bias <= 0.) {
       value_t change = step_size * Delta_bias;
@@ -307,9 +309,18 @@ value_t SparseLinearSolver::perform_newton_update_on_bias() {
       add_scalar_to_vector(Aomega, change);
       return change;
     }
-    ++backtrack_itr;
-    step_size *= 0.5;
+    
+    if (backtrack_itr <= 2) {
+      step_size *= 0.5;
+    } else {
+      step_size *= 0.1;
+    }
+
+    if (step_size * Delta_bias == 0.) {
+      break;
+    }
   }
+  update_x(0.);
   return 0;
 }
 
@@ -363,10 +374,10 @@ compute_backtracking_step_size_derivative(value_t step_size) const {
 
 
 void SparseLinearSolver::update_x(value_t step_size) {
+  const value_t* labels = data->b_values();
   for (index_t i = 0; i < num_examples; ++i) {
-    value_t diff_a_dot_omega = step_size * (Delta_Aomega[i] + Delta_bias);
-    value_t label = data->b_value(i);
-    x[i] = loss_function->compute_deriative(Aomega[i] + diff_a_dot_omega, label);
+    value_t diff_aiTomega = step_size * (Delta_Aomega[i] + Delta_bias);
+    x[i] = loss_function->compute_deriative(Aomega[i] + diff_aiTomega, labels[i]);
   }
   sum_x = sum_vector(x);
   z_match_x = false;
@@ -667,7 +678,7 @@ void SparseLinearSolver::initialize_blitz_variables(
   ATy.assign(num_components, 0.);
 
   update_x();
-  update_bias(10);
+  update_bias(15);
 
   z = x;
   ATz.assign(num_components, 0.);

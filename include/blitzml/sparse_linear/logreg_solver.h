@@ -11,17 +11,16 @@ class SparseLogRegSolver : public SparseLinearSolver {
   protected: 
     void initialize_blitz_variables(value_t* initial_conditions);
     void initialize_x_variables();
-    void update_bias(int max_newton_itr=4);
+    void update_bias(int max_newton_itr=8);
     void perform_backtracking();
-    value_t compute_deriv_bias(value_t change) const;
-    value_t compute_hess_bias(value_t change) const;
     value_t compute_dual_obj() const;
     void update_subproblem_obj_vals();
     void update_newton_2nd_derivatives(value_t epsilon_to_add=0.);
 
   private:
+    bool problem_is_degenerate;
     std::vector<value_t> exp_bAomega;
-
+    std::vector<bool> is_positive_label;
 };
 
 }

@@ -9,14 +9,16 @@ lib.BlitzML_sparse_linear_solver_compute_max_l1_penalty.restype = value_t
 
 class SparseLinearProblem(Problem):
   def __init__(self, A, b):
-    self._check_data_inputs(A, b)
     self._dataset = Dataset(A, b) 
+    self._check_data_inputs()
     self._set_solver_c()
 
   def _set_solver_c(self):
     self._solver_c_wrap = lib.BlitzML_new_sparse_linear_solver_wrapper()
 
-  def _check_data_inputs(self, A, b):
+  def _check_data_inputs(self):
+    A = self._dataset.A
+    b = self._dataset.b
     if not sp.isspmatrix(A) and type(A) != np.ndarray:
       msg = ("Design matrix of type {} not allowed. Type must be "
              "numpy.ndarray or scipy sparse matrix.").format(type(A).__name__)
@@ -216,6 +218,10 @@ class LassoProblem(SparseLinearProblem):
   def _loss_index(self):
     return 0.
 
+  def _check_data_inputs(self):
+    SparseLinearProblem._check_data_inputs(self)
+    check_regression_labels(self._dataset)
+
   def _set_solver_c(self):
     self._solver_c_wrap = lib.BlitzML_new_lasso_solver_wrapper()
 
@@ -249,6 +255,10 @@ class SparseHuberProblem(SparseLinearProblem):
   def _loss_index(self):
     return 1.
 
+  def _check_data_inputs(self):
+    SparseLinearProblem._check_data_inputs(self)
+    check_regression_labels(self._dataset)
+
 
 class SparseLogisticRegressionProblem(SparseLinearProblem):
   r"""Class for training sparse linear models with logistic loss.
@@ -269,19 +279,9 @@ class SparseLogisticRegressionProblem(SparseLinearProblem):
   def _loss_index(self):
     return 2.
 
-  def _check_data_inputs(self, A, b):
-    SparseLinearProblem._check_data_inputs(self, A, b)
-    min_b = min(b)
-    if min_b < -1.0:
-      msg = ("Labels vector conatins values less than -1.0, which is "
-             "not allowed for sparse logistic regression.")
-      value_error(msg)
-    max_b = max(b)
-    if max_b > 1.0:
-      msg = ("Labels vector contains values greater than 1.0, which is "
-             "not allowed for sparse logistic regression.")
-      value_error(msg)
-    check_classification_labels(b, min_b, max_b)
+  def _check_data_inputs(self):
+    SparseLinearProblem._check_data_inputs(self)
+    check_classification_labels(self._dataset)
 
   def _set_solver_c(self):
     self._solver_c_wrap = lib.BlitzML_new_sparse_logreg_solver_wrapper()
@@ -306,9 +306,9 @@ class SparseSquaredHingeProblem(SparseLinearProblem):
   def _loss_index(self):
     return 3.
 
-  def _check_data_inputs(self, A, b):
-    SparseLinearProblem._check_data_inputs(self, A, b)
-    check_classification_labels(b)
+  def _check_data_inputs(self):
+    SparseLinearProblem._check_data_inputs(self)
+    check_classification_labels(self._dataset)
 
 
 class SparseSmoothedHingeProblem(SparseLinearProblem):
@@ -340,9 +340,9 @@ class SparseSmoothedHingeProblem(SparseLinearProblem):
   def _loss_index(self):
     return 4.
 
-  def _check_data_inputs(self, A, b):
-    SparseLinearProblem._check_data_inputs(self, A, b)
-    check_classification_labels(b)
+  def _check_data_inputs(self):
+    SparseLinearProblem._check_data_inputs(self)
+    check_classification_labels(self._dataset)
 
 
 class LassoSolution(RegressionSolution):

@@ -5,6 +5,7 @@ from scipy import sparse as sp
 
 from common import captured_output
 from common import matrix_vector_product
+from common import normalize_labels
 
 def is_solution(sol, A, b, lam, tol=1e-3):
   Aomega = sol.bias + matrix_vector_product(A, sol.weights) 
@@ -22,24 +23,18 @@ def is_solution(sol, A, b, lam, tol=1e-3):
   return True
 
 
-def scale_labels(b):
-    b = b.astype(np.float)
-    b -= min(b)
-    b /= max(b)
-    return 2 * b - 1.0
-
 
 class TestSparseLogRegInitialConditions(unittest.TestCase):
   def test_sparse_logreg_bad_initial_conditions(self):
     n = 7
     d = 3
     A = np.arange(n * d).reshape(n, d)
-    b = scale_labels(np.arange(n))
+    b = normalize_labels(np.arange(n), True)
     prob = blitzml.SparseLogisticRegressionProblem(A, b)
     lammax = prob.compute_max_l1_penalty()
     weights0 = -1 * np.arange(d)
     lam = 0.02 * lammax
-    sol = prob.solve(lam, initial_weights=weights0, stopping_tolerance=1e-4, max_time=0.1)
+    sol = prob.solve(lam, initial_weights=weights0, stopping_tolerance=1e-6)
     self.assertEqual(is_solution(sol, A, b, lam), True)
 
   def test_sparse_logreg_good_initial_conditions(self):
@@ -47,7 +42,7 @@ class TestSparseLogRegInitialConditions(unittest.TestCase):
     d = 21
     np.random.seed(0)
     A = np.random.randn(n, d)
-    b = scale_labels(np.random.randn(n))
+    b = normalize_labels(np.random.randn(n), True)
     prob = blitzml.SparseLogisticRegressionProblem(A, b)
     lammax = prob.compute_max_l1_penalty()
     lam = 0.03 * lammax
@@ -60,16 +55,18 @@ class TestSparseLogRegBadLabels(unittest.TestCase):
   def test_sparse_logreg_bad_label_too_large(self):
     b = np.array([-1., 0., 2.])
     A = np.zeros((3, 3))
-    def make_prob():
+    with captured_output() as out:
       prob = blitzml.SparseLogisticRegressionProblem(A, b)
-    self.assertRaises(ValueError, make_prob)
+    message = out[0]
+    self.assertIn("Warning", message)
 
   def test_sparse_logreg_bad_label_too_small(self):
     b = np.array([-1., 0., -2.])
     A = np.zeros((3, 3))
-    def make_prob():
+    with captured_output() as out:
       prob = blitzml.SparseLogisticRegressionProblem(A, b)
-    self.assertRaises(ValueError, make_prob)
+    message = out[0]
+    self.assertIn("Warning", message)
 
   def test_sparse_logreg_dimension_mismatch(self):
     b = np.array([-1., 0., -2.])
@@ -83,7 +80,7 @@ class TestSparseLogRegBadLabels(unittest.TestCase):
     A = np.zeros((3, 3))
     with captured_output() as out:
       prob = blitzml.SparseLogisticRegressionProblem(A, b)
-    message = out.getvalue()
+    message = out[0]
     self.assertIn("Warning", message)
 
 
