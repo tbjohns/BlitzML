@@ -1,0 +1,626 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>BlitzML API reference &mdash; BlitzML 0.0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="https://media.readthedocs.org/css/sphinx_rtd_theme.css" type="text/css" />
+  
+    <link rel="stylesheet" href="https://media.readthedocs.org/css/readthedocs-doc-embed.css" type="text/css" />
+  
+    <link rel="stylesheet" href="_static/extra.css" type="text/css" />
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="BlitzML 0.0.1 documentation" href="index.html"/>
+        <link rel="prev" title="BlitzML python package" href="index.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> BlitzML
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">BlitzML API reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#training-l1-regularized-models">Training L1-regularized models</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#module-blitzml">Problem classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-blitzml._sparse_linear">Solution classes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-blitzml">Utility functions</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">BlitzML</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>BlitzML API reference</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="blitzml-api-reference">
+<h1>BlitzML API reference<a class="headerlink" href="#blitzml-api-reference" title="Permalink to this headline">¶</a></h1>
+<p>This is the complete API reference for the BlitzML python package.</p>
+<div class="section" id="training-l1-regularized-models">
+<h2>Training L1-regularized models<a class="headerlink" href="#training-l1-regularized-models" title="Permalink to this headline">¶</a></h2>
+<p>L1 regularization is a popular approach to training sparse models.  BlitzML
+efficiently solves L1-regularized problems with a variety of loss functions.</p>
+<div class="section" id="module-blitzml">
+<span id="problem-classes"></span><h3>Problem classes<a class="headerlink" href="#module-blitzml" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="blitzml.LassoProblem">
+<em class="property">class </em><code class="descclassname">blitzml.</code><code class="descname">LassoProblem</code><span class="sig-paren">(</span><em>A</em>, <em>b</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blitzml/_sparse_linear.html#LassoProblem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blitzml.LassoProblem" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class for training sparse linear models with squared loss.
+The optimization objective is</p>
+<div class="math">
+<p><img src="_images/math/a6e5d9e3091d461a0655df6daad24003a91b9cf0.svg" alt="\tfrac{1}2 ||A w - b||^2 + \lambda ||w||_1 ."/></p>
+</div><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>A</strong> (<em>numpy.ndarray</em><em> or </em><em>scipy.sparse matrix</em>) – n x d design matrix.</li>
+<li><strong>b</strong> (<em>numpy.ndarray</em>) – Labels array of length n.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Blitz tries its best to avoid copying data, but depending on the formats of A
+and b, Blitz may make a copy of these arrays. To avoid copying, follow these
+guidelines:</p>
+<ul class="simple">
+<li>If A is dense (numpy.ndarray), define A as an <a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.asfortranarray.html">F-contiguous array</a>.
+The dtype for A should match ctypes.c_double, ctypes.c_float, ctypes.c_int,
+or ctypes.c_bool—that is, <code class="docutils literal"><span class="pre">A.dtype</span> <span class="pre">==</span> <span class="pre">ctypes.c_double</span></code> evaluates to
+True, for example.</li>
+<li>If A is sparse, define A as a scipy.sparse.csc_matrix. The dtype for
+A.indices should match type ctypes.c_int. The dtype for A.indptr should
+match type ctypes.c_size_t. BlitzML can work with double, float, int, and
+bool dtypes for A.data without copying.</li>
+<li>The dtype for b should match type ctypes.c_double.</li>
+</ul>
+<p>BlitzML will print a warning when objects with more than 1e7 elements
+are being copied.  To suppress warnings, use <code class="docutils literal"><span class="pre">blitzml.suppress_warnings()</span></code>.</p>
+<dl class="method">
+<dt id="blitzml.LassoProblem.compute_max_l1_penalty">
+<code class="descname">compute_max_l1_penalty</code><span class="sig-paren">(</span><em>include_bias_term=True</em><span class="sig-paren">)</span><a class="headerlink" href="#blitzml.LassoProblem.compute_max_l1_penalty" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the smallest L1 penalty parameter for which all weights
+in the solution equal zero.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>include_bias_term</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to include an unregularized bias term in the model.  Default
+is True.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>max_l1_penalty</strong></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">float</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="blitzml.LassoProblem.solve">
+<code class="descname">solve</code><span class="sig-paren">(</span><em>l1_penalty</em>, <em>include_bias_term=True</em>, <em>initial_weights=None</em>, <em>stopping_tolerance=0.001</em>, <em>max_time=31540000.0</em>, <em>min_time=0.0</em>, <em>max_iterations=100000</em>, <em>verbose=False</em>, <em>log_directory=None</em><span class="sig-paren">)</span><a class="headerlink" href="#blitzml.LassoProblem.solve" title="Permalink to this definition">¶</a></dt>
+<dd><p>Minimizes the objective</p>
+<div class="math">
+<p><img src="_images/math/3dba28e2dfa177391793ec27fc8fd067fce9dcbe.svg" alt="\sum_i L(a_i^T w, b_i) + \texttt{l1\_penalty} ||w||_1 ,"/></p>
+</div><p>where L is the problem’s loss function.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>l1_penalty</strong> (<em>float &gt; 0</em>) – Regularization parameter for L1 norm penalty on weights. When this value
+is larger, the solution generally contains more zero entries and Blitz
+generally completes optimization faster.</li>
+<li><strong>include_bias_term</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to include an unregularized bias parameter in the model.
+Default is True.</li>
+<li><strong>initial_weights</strong> (<em>numpy.ndarray of length d</em><em>, </em><em>optional</em>) – Initial weights to warm-start optimization.  The solver requires
+less time if initialized to a good approximate solution. Default is None.</li>
+<li><strong>stopping_tolerance</strong> (<em>float</em><em>, </em><em>optional</em>) – Stopping tolerance for solver.  Optimization terminates if
+(duality_gap / objective_value) is less than stopping_tolerance.
+Default is 1e-3.</li>
+<li><strong>max_time</strong> (<em>float</em><em>, </em><em>optional</em>) – Time limit in seconds for solving. If stopping tolerance is not reached,
+optimization terminates after this number of seconds.  Default is 1 year.</li>
+<li><strong>min_time</strong> (<em>float</em><em>, </em><em>optional</em>) – Minimum time in seconds for solving.  Optimization continues until
+this amount of time passes, even after reaching stopping tolerance.
+Default is zero.</li>
+<li><strong>max_iterations</strong> (<em>int</em><em>, </em><em>optional</em>) – Iterations limit for algorithm. If stopping tolerance is not reached
+after this number of iterations, optimization terminates.  Default is
+100000.</li>
+<li><strong>verbose</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to print information, such as objective value, to sys.stdout
+during optimization. Default is False.</li>
+<li><strong>log_directory</strong> (<em>string</em><em>, </em><em>optional</em>) – Path to existing directory for Blitz to log time and objective value
+information.  This directory should be empty prior to solving. Default
+is None.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>solution</strong></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">BlitzMLSolution</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="blitzml.SparseLogisticRegressionProblem">
+<em class="property">class </em><code class="descclassname">blitzml.</code><code class="descname">SparseLogisticRegressionProblem</code><span class="sig-paren">(</span><em>A</em>, <em>b</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blitzml/_sparse_linear.html#SparseLogisticRegressionProblem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blitzml.SparseLogisticRegressionProblem" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class for training sparse linear models with logistic loss.
+The optimization objective is</p>
+<div class="math">
+<p><img src="_images/math/effa4e1446f9ed5b716e3eb9892c5468b5ef23bb.svg" alt="\sum_i \log(1 + \exp(-b_i a_i^T w)) + \lambda ||w||_1 ,"/></p>
+</div><p>where i indexes the ith row in A and ith entry in b.  Each label should have
+value 1, -1, or somewhere in between.</p>
+<p>Calls to <code class="docutils literal"><span class="pre">solve</span></code> and <code class="docutils literal"><span class="pre">compute_max_l1_penalty</span></code> use interfaces identical to
+the same methods in <code class="docutils literal"><span class="pre">blitzml.LassoProblem</span></code>.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="blitzml.SparseHuberProblem">
+<em class="property">class </em><code class="descclassname">blitzml.</code><code class="descname">SparseHuberProblem</code><span class="sig-paren">(</span><em>A</em>, <em>b</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blitzml/_sparse_linear.html#SparseHuberProblem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blitzml.SparseHuberProblem" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class for training sparse linear models with huber loss.
+The optimization objective is</p>
+<div class="math">
+<p><img src="_images/math/e27da213655e19e356cf1c40ad34d5d9ce0b72f0.svg" alt="\sum_i L(a_i^T w, b_i) + \lambda ||w||_1 ,"/></p>
+</div><p>where</p>
+<div class="math">
+<p><img src="_images/math/5d7b918beec9d83f121b26e57bb75d94eaabb8e5.svg" alt="L(a_i^T w, b_i) = \left\{
+\begin{array}{lll}
+  \tfrac{1}2 (a_i^T w - b_i)^2 &amp; &amp; \text{if}\ |a_i^T w - b_i| &lt; 1  \\[0.4em]
+  a_i^T w - b_i - \onehalf     &amp; &amp; \text{if}\ a_i^T w - b_i \geq 1 \\[0.4em]
+  b_i - a_i^T w - \onehalf     &amp; &amp; \text{otherwise.}
+\end{array} \right."/></p>
+</div><p>Here i indexes the ith row in A and ith entry in b.</p>
+<p>Calls to <code class="docutils literal"><span class="pre">solve</span></code> and <code class="docutils literal"><span class="pre">compute_max_l1_penalty</span></code> use interfaces identical to
+those in <code class="docutils literal"><span class="pre">blitzml.LassoProblem</span></code>.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="blitzml.SparseSquaredHingeProblem">
+<em class="property">class </em><code class="descclassname">blitzml.</code><code class="descname">SparseSquaredHingeProblem</code><span class="sig-paren">(</span><em>A</em>, <em>b</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blitzml/_sparse_linear.html#SparseSquaredHingeProblem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blitzml.SparseSquaredHingeProblem" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class for training sparse linear models with squared hinge loss.
+The optimization objective is</p>
+<div class="math">
+<p><img src="_images/math/39a4305ec4c1d57a69c1dedd724a99ffd78a00a2.svg" alt="\sum_i \onehalf (1 - b_i a_i^T w)_+^2 + \lambda ||w||_1 ,"/></p>
+</div><p>where the “+” subscript denotes the rectifier function.  Each label should
+have value 1 or -1.</p>
+<p>Calls to <code class="docutils literal"><span class="pre">solve</span></code> and <code class="docutils literal"><span class="pre">compute_max_l1_penalty</span></code> use interfaces identical to
+those in <code class="docutils literal"><span class="pre">blitzml.LassoProblem</span></code>.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="blitzml.SparseSmoothedHingeProblem">
+<em class="property">class </em><code class="descclassname">blitzml.</code><code class="descname">SparseSmoothedHingeProblem</code><span class="sig-paren">(</span><em>A</em>, <em>b</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blitzml/_sparse_linear.html#SparseSmoothedHingeProblem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blitzml.SparseSmoothedHingeProblem" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class for training sparse linear models with smoothed hinge loss.
+The optimization objective is</p>
+<div class="math">
+<p><img src="_images/math/e27da213655e19e356cf1c40ad34d5d9ce0b72f0.svg" alt="\sum_i L(a_i^T w, b_i) + \lambda ||w||_1 ,"/></p>
+</div><p>where</p>
+<div class="math">
+<p><img src="_images/math/dfb015b7e62e65ead30af318fe3a92a8e49c082b.svg" alt="L(a_i^T w, b_i) = \left\{
+\begin{array}{lll}
+  \onehalf - b_i a_i^T w       &amp;&amp; \text{if}\ b_i a_i^T w &lt; 0       \\[0.4em]
+  \onehalf (1 - b_i a_i^T w)^2 &amp;&amp; \text{if}\ b_i a_i^T w \in [0,1) \\[0.4em]
+  0                            &amp;&amp; \text{otherwise.}
+\end{array} \right."/></p>
+</div><p>Each label should have value 1 or -1.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-blitzml._sparse_linear">
+<span id="solution-classes"></span><h3>Solution classes<a class="headerlink" href="#module-blitzml._sparse_linear" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="blitzml._sparse_linear.LassoSolution">
+<em class="property">class </em><code class="descclassname">blitzml._sparse_linear.</code><code class="descname">LassoSolution</code><a class="reference internal" href="_modules/blitzml/_sparse_linear.html#LassoSolution"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blitzml._sparse_linear.LassoSolution" title="Permalink to this definition">¶</a></dt>
+<dd><p>Solution class for <code class="docutils literal"><span class="pre">LassoProblem</span></code>.</p>
+<dl class="attribute">
+<dt id="blitzml._sparse_linear.LassoSolution.bias">
+<code class="descname">bias</code><a class="headerlink" href="#blitzml._sparse_linear.LassoSolution.bias" title="Permalink to this definition">¶</a></dt>
+<dd><p>Value of model’s bias term.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="blitzml._sparse_linear.LassoSolution.compute_loss">
+<code class="descname">compute_loss</code><span class="sig-paren">(</span><em>A</em>, <em>b</em><span class="sig-paren">)</span><a class="headerlink" href="#blitzml._sparse_linear.LassoSolution.compute_loss" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the sum</p>
+<div class="math">
+<p><img src="_images/math/3a5c0aa9866b5536c04596ebd47c359064b4e4fe.svg" alt="\sum_i L(a_i^T w, b_i) ,"/></p>
+</div><p>where L is the problem’s loss function.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>A</strong> (<em>numpy.ndarray</em><em> or </em><em>scipy.sparse matrix</em>) – n x d design matrix for evaluating loss.</li>
+<li><strong>b</strong> (<em>numpy.ndarray</em>) – Corresponding labels array of length n.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>loss</strong></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">float</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="blitzml._sparse_linear.LassoSolution.dual_solution">
+<code class="descname">dual_solution</code><a class="headerlink" href="#blitzml._sparse_linear.LassoSolution.dual_solution" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dual solution to optimization problem.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="blitzml._sparse_linear.LassoSolution.duality_gap">
+<code class="descname">duality_gap</code><a class="headerlink" href="#blitzml._sparse_linear.LassoSolution.duality_gap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Duality gap between primal and dual solutions (which upper bounds the
+suboptimality of these solutions).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="blitzml._sparse_linear.LassoSolution.objective_value">
+<code class="descname">objective_value</code><a class="headerlink" href="#blitzml._sparse_linear.LassoSolution.objective_value" title="Permalink to this definition">¶</a></dt>
+<dd><p>Objective value of solution.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="blitzml._sparse_linear.LassoSolution.predict">
+<code class="descname">predict</code><span class="sig-paren">(</span><em>A</em><span class="sig-paren">)</span><a class="headerlink" href="#blitzml._sparse_linear.LassoSolution.predict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Predict label values from feature vectors.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>A</strong> (<em>numpy.ndarray</em><em> or </em><em>scipy.sparse matrix</em>) – n x d design matrix to make predictions for.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>predictions</strong></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">numpy.ndarray of length n.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="blitzml._sparse_linear.LassoSolution.save">
+<code class="descname">save</code><span class="sig-paren">(</span><em>filepath</em><span class="sig-paren">)</span><a class="headerlink" href="#blitzml._sparse_linear.LassoSolution.save" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save model to disk.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filepath</strong> (<em>string</em>) – Location to save solution.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="blitzml._sparse_linear.LassoSolution.solution_status">
+<code class="descname">solution_status</code><a class="headerlink" href="#blitzml._sparse_linear.LassoSolution.solution_status" title="Permalink to this definition">¶</a></dt>
+<dd><p>Status of Blitz algorithm upon returning model.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="blitzml._sparse_linear.LassoSolution.weights">
+<code class="descname">weights</code><a class="headerlink" href="#blitzml._sparse_linear.LassoSolution.weights" title="Permalink to this definition">¶</a></dt>
+<dd><p>Array of model’s weight values.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="blitzml._sparse_linear.SparseLogisticRegressionSolution">
+<em class="property">class </em><code class="descclassname">blitzml._sparse_linear.</code><code class="descname">SparseLogisticRegressionSolution</code><a class="reference internal" href="_modules/blitzml/_sparse_linear.html#SparseLogisticRegressionSolution"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blitzml._sparse_linear.SparseLogisticRegressionSolution" title="Permalink to this definition">¶</a></dt>
+<dd><p>Solution class for <code class="docutils literal"><span class="pre">SparseLogisticRegressionProblem</span></code>.</p>
+<p>Except for the following additional method, interface is identical to
+<code class="docutils literal"><span class="pre">LassoSolution</span></code>’s interface.</p>
+<dl class="method">
+<dt id="blitzml._sparse_linear.SparseLogisticRegressionSolution.predict_probabilities">
+<code class="descname">predict_probabilities</code><span class="sig-paren">(</span><em>A</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blitzml/_sparse_linear.html#SparseLogisticRegressionSolution.predict_probabilities"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blitzml._sparse_linear.SparseLogisticRegressionSolution.predict_probabilities" title="Permalink to this definition">¶</a></dt>
+<dd><p>Predict probability values from feature vectors.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>A</strong> (<em>numpy.ndarray</em><em> or </em><em>scipy.sparse matrix</em>) – n x d design matrix to predict probabilities for.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>predicted_probabilities</strong></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">numpy.ndarray (length n with values in [0, 1])</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="blitzml._sparse_linear.SparseHuberSolution">
+<em class="property">class </em><code class="descclassname">blitzml._sparse_linear.</code><code class="descname">SparseHuberSolution</code><a class="reference internal" href="_modules/blitzml/_sparse_linear.html#SparseHuberSolution"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blitzml._sparse_linear.SparseHuberSolution" title="Permalink to this definition">¶</a></dt>
+<dd><p>Solution class for <code class="docutils literal"><span class="pre">SparseHuberProblem</span></code>.</p>
+<p>Interface is identical to <code class="docutils literal"><span class="pre">LassoSolution</span></code>’s interface.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="blitzml._sparse_linear.SparseSquaredHingeSolution">
+<em class="property">class </em><code class="descclassname">blitzml._sparse_linear.</code><code class="descname">SparseSquaredHingeSolution</code><a class="reference internal" href="_modules/blitzml/_sparse_linear.html#SparseSquaredHingeSolution"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blitzml._sparse_linear.SparseSquaredHingeSolution" title="Permalink to this definition">¶</a></dt>
+<dd><p>Solution class for <code class="docutils literal"><span class="pre">SparseSquaredHingeProblem</span></code>.</p>
+<p>Interface is identical to <code class="docutils literal"><span class="pre">LassoSolution</span></code>’s interface.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="blitzml._sparse_linear.SparseSmoothedHingeSolution">
+<em class="property">class </em><code class="descclassname">blitzml._sparse_linear.</code><code class="descname">SparseSmoothedHingeSolution</code><a class="reference internal" href="_modules/blitzml/_sparse_linear.html#SparseSmoothedHingeSolution"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blitzml._sparse_linear.SparseSmoothedHingeSolution" title="Permalink to this definition">¶</a></dt>
+<dd><p>Solution class for <code class="docutils literal"><span class="pre">SparseSquaredHingeProblem</span></code>.</p>
+<p>Interface is identical to <code class="docutils literal"><span class="pre">LassoSolution</span></code>’s interface.</p>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="module-blitzml">
+<span id="utility-functions"></span><h2>Utility functions<a class="headerlink" href="#module-blitzml" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="blitzml.load_solution">
+<code class="descclassname">blitzml.</code><code class="descname">load_solution</code><span class="sig-paren">(</span><em>filepath</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blitzml/_core.html#load_solution"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blitzml.load_solution" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load BlitzMLSolution from disk.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filepath</strong> (<em>string</em>) – Path to saved solution.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>solution</strong></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">BlitzMLSolution.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="blitzml.parse_log_directory">
+<code class="descclassname">blitzml.</code><code class="descname">parse_log_directory</code><span class="sig-paren">(</span><em>log_directory</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/blitzml/_log_parser.html#parse_log_directory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blitzml.parse_log_directory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse files logged by BlitzML during a solve call.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>log_directory</strong> (<em>string</em>) – Path to directory containing log files to parse.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>logs</strong> – Iterable over information logged by BlitzML. Each item is a dictionary of
+logged values.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">generator</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="blitzml.suppress_warnings">
+<code class="descclassname">blitzml.</code><code class="descname">suppress_warnings</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blitzml/_core.html#suppress_warnings"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blitzml.suppress_warnings" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stop BlitzML from printing warning messages to sys.stdout. By default,
+warning messages are unsuppressed.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="blitzml.unsuppress_warnings">
+<code class="descclassname">blitzml.</code><code class="descname">unsuppress_warnings</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/blitzml/_core.html#unsuppress_warnings"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#blitzml.unsuppress_warnings" title="Permalink to this definition">¶</a></dt>
+<dd><p>Allow BlitzML to print warning messages to sys.stdout.</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="index.html" class="btn btn-neutral" title="BlitzML python package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Tyler Johnson.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

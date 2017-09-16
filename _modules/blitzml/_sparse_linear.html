@@ -1,0 +1,645 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>blitzml._sparse_linear &mdash; BlitzML 0.0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="https://media.readthedocs.org/css/sphinx_rtd_theme.css" type="text/css" />
+  
+    <link rel="stylesheet" href="https://media.readthedocs.org/css/readthedocs-doc-embed.css" type="text/css" />
+  
+    <link rel="stylesheet" href="../../_static/extra.css" type="text/css" />
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="BlitzML 0.0.1 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> BlitzML
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">BlitzML API reference</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">BlitzML</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>blitzml._sparse_linear</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for blitzml._sparse_linear</h1><div class="highlight"><pre>
+<span></span><span class="c1"># coding: utf-8</span>
+
+<span class="kn">from</span> <span class="nn">._core</span> <span class="k">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">._dataset</span> <span class="k">import</span> <span class="n">Dataset</span>
+
+
+<span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_sparse_linear_solver_compute_max_l1_penalty</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">pointer_t</span><span class="p">,</span> <span class="n">pointer_t</span><span class="p">,</span> <span class="n">pointer_t</span><span class="p">]</span>
+<span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_sparse_linear_solver_compute_max_l1_penalty</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="n">value_t</span>
+
+<span class="k">class</span> <span class="nc">SparseLinearProblem</span><span class="p">(</span><span class="n">Problem</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_dataset</span> <span class="o">=</span> <span class="n">Dataset</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span> 
+    <span class="bp">self</span><span class="o">.</span><span class="n">_check_data_inputs</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_set_solver_c</span><span class="p">()</span>
+
+  <span class="k">def</span> <span class="nf">_set_solver_c</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_solver_c_wrap</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_new_sparse_linear_solver_wrapper</span><span class="p">()</span>
+
+  <span class="k">def</span> <span class="nf">_check_data_inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">A</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dataset</span><span class="o">.</span><span class="n">A</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dataset</span><span class="o">.</span><span class="n">b</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">sp</span><span class="o">.</span><span class="n">isspmatrix</span><span class="p">(</span><span class="n">A</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">A</span><span class="p">)</span> <span class="o">!=</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Design matrix of type </span><span class="si">{}</span><span class="s2"> not allowed. Type must be &quot;</span>
+             <span class="s2">&quot;numpy.ndarray or scipy sparse matrix.&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">A</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+      <span class="n">value_error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">b</span><span class="p">)</span> <span class="o">!=</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Labels vector of type </span><span class="si">{}</span><span class="s2"> not allowed. Type must be &quot;</span>
+             <span class="s2">&quot;numpy.ndarray.&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">b</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+      <span class="n">value_error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">A</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Design matrix with shape </span><span class="si">{}</span><span class="s2"> not allowed. &quot;</span>
+             <span class="s2">&quot;Matrix must be 2d.&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+      <span class="n">value_error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">b</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Labels vector with shape </span><span class="si">{}</span><span class="s2"> not allowed. &quot;</span> 
+             <span class="s2">&quot;Labels must be 1d.&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+      <span class="n">value_error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">A</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">b</span><span class="p">):</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Dimension mismatch between matrix shape </span><span class="si">{}</span><span class="s2"> and labels shape </span><span class="si">{}</span><span class="s2">. &quot;</span>
+             <span class="s2">&quot;Length of labels vector must equal number of rows in &quot;</span>
+             <span class="s2">&quot;design matrix.&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">b</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+      <span class="n">value_error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">compute_max_l1_penalty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">include_bias_term</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Compute the smallest L1 penalty parameter for which all weights</span>
+<span class="sd">    in the solution equal zero.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    include_bias_term : bool, optional</span>
+<span class="sd">      Whether to include an unregularized bias term in the model.  Default</span>
+<span class="sd">      is True.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    max_l1_penalty : float</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">parameters</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+    <span class="n">parameters</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">include_bias_term</span><span class="p">)</span>
+    <span class="n">parameters</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loss_index</span>
+    <span class="n">parameters_c_wrap</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_set_parameters</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
+
+    <span class="n">ret</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_sparse_linear_solver_compute_max_l1_penalty</span><span class="p">(</span>
+                                              <span class="bp">self</span><span class="o">.</span><span class="n">_solver_c_wrap</span><span class="o">.</span><span class="n">c_pointer</span><span class="p">,</span> 
+                                              <span class="bp">self</span><span class="o">.</span><span class="n">_dataset</span><span class="o">.</span><span class="n">c_pointer</span><span class="p">,</span> 
+                                              <span class="n">parameters_c_wrap</span><span class="o">.</span><span class="n">c_pointer</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ret</span>
+    
+
+  <span class="k">def</span> <span class="nf">solve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">l1_penalty</span><span class="p">,</span> <span class="n">include_bias_term</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">initial_weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+            <span class="n">stopping_tolerance</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">,</span> <span class="n">max_time</span><span class="o">=</span><span class="mf">3.154e+7</span><span class="p">,</span> <span class="n">min_time</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> 
+            <span class="n">max_iterations</span><span class="o">=</span><span class="mi">100000</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">log_directory</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Minimizes the objective</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">       \sum_i L(a_i^T w, b_i) + \texttt{l1\_penalty} ||w||_1 ,</span>
+
+<span class="sd">    where L is the problem&#39;s loss function.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    l1_penalty : float &gt; 0</span>
+<span class="sd">      Regularization parameter for L1 norm penalty on weights. When this value</span>
+<span class="sd">      is larger, the solution generally contains more zero entries and Blitz</span>
+<span class="sd">      generally completes optimization faster.</span>
+
+<span class="sd">    include_bias_term : bool, optional</span>
+<span class="sd">      Whether to include an unregularized bias parameter in the model.  </span>
+<span class="sd">      Default is True.</span>
+
+<span class="sd">    initial_weights : numpy.ndarray of length d, optional</span>
+<span class="sd">      Initial weights to warm-start optimization.  The solver requires</span>
+<span class="sd">      less time if initialized to a good approximate solution. Default is None.</span>
+
+<span class="sd">    stopping_tolerance : float, optional</span>
+<span class="sd">      Stopping tolerance for solver.  Optimization terminates if</span>
+<span class="sd">      (duality_gap / objective_value) is less than stopping_tolerance.</span>
+<span class="sd">      Default is 1e-3.</span>
+
+<span class="sd">    max_time : float, optional</span>
+<span class="sd">      Time limit in seconds for solving. If stopping tolerance is not reached, </span>
+<span class="sd">      optimization terminates after this number of seconds.  Default is 1 year.</span>
+
+<span class="sd">    min_time : float, optional</span>
+<span class="sd">      Minimum time in seconds for solving.  Optimization continues until </span>
+<span class="sd">      this amount of time passes, even after reaching stopping tolerance.  </span>
+<span class="sd">      Default is zero.</span>
+<span class="sd">    </span>
+<span class="sd">    max_iterations : int, optional</span>
+<span class="sd">      Iterations limit for algorithm. If stopping tolerance is not reached </span>
+<span class="sd">      after this number of iterations, optimization terminates.  Default is </span>
+<span class="sd">      100000.</span>
+
+<span class="sd">    verbose : bool, optional</span>
+<span class="sd">      Whether to print information, such as objective value, to sys.stdout </span>
+<span class="sd">      during optimization. Default is False.</span>
+
+<span class="sd">    log_directory : string, optional</span>
+<span class="sd">      Path to existing directory for Blitz to log time and objective value </span>
+<span class="sd">      information.  This directory should be empty prior to solving. Default</span>
+<span class="sd">      is None.</span>
+
+<span class="sd">      </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    solution : BlitzMLSolution </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">option_names</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;stopping_tolerance&quot;</span><span class="p">,</span> <span class="s2">&quot;max_time&quot;</span><span class="p">,</span> <span class="s2">&quot;min_time&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;max_iterations&quot;</span><span class="p">,</span> <span class="s2">&quot;verbose&quot;</span><span class="p">]</span> 
+    <span class="n">options</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">option_names</span><span class="p">:</span>
+      <span class="n">options</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="nb">locals</span><span class="p">()[</span><span class="n">name</span><span class="p">]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_set_solver_options</span><span class="p">(</span><span class="o">**</span><span class="n">options</span><span class="p">)</span>
+
+    <span class="n">parameters</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+    <span class="n">parameters</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">l1_penalty</span>
+    <span class="n">parameters</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">include_bias_term</span><span class="p">)</span>
+    <span class="n">parameters</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loss_index</span>
+    <span class="n">parameters_c_wrap</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_set_parameters</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
+
+    <span class="n">num_examples</span><span class="p">,</span> <span class="n">num_features</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dataset</span><span class="o">.</span><span class="n">A</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">num_features</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">num_examples</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">initial_weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">num_features</span><span class="p">]</span> <span class="o">=</span> <span class="n">initial_weights</span>
+    <span class="n">result_c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_set_result</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+
+    <span class="n">solution_status_c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setup_solution_status</span><span class="p">()</span>
+
+    <span class="n">log_dir_c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_set_log_directory</span><span class="p">(</span><span class="n">log_directory</span><span class="p">)</span>
+
+    <span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_solve_problem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_solver_c_wrap</span><span class="o">.</span><span class="n">c_pointer</span><span class="p">,</span> 
+                              <span class="bp">self</span><span class="o">.</span><span class="n">_dataset</span><span class="o">.</span><span class="n">c_pointer</span><span class="p">,</span> 
+                              <span class="n">parameters_c_wrap</span><span class="o">.</span><span class="n">c_pointer</span><span class="p">,</span> 
+                              <span class="n">result_c</span><span class="p">,</span> 
+                              <span class="n">solution_status_c</span><span class="p">,</span> 
+                              <span class="n">log_dir_c</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_format_solution_status</span><span class="p">()</span>
+
+    <span class="n">weights</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">num_features</span><span class="p">]</span>
+    <span class="n">bias</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="n">num_features</span><span class="p">]</span>
+    <span class="n">dual_solution</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="mi">1</span><span class="o">+</span><span class="n">num_features</span><span class="p">:</span><span class="mi">1</span><span class="o">+</span><span class="n">num_features</span><span class="o">+</span><span class="n">num_examples</span><span class="p">]</span>
+    <span class="n">duality_gap</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">objective_value</span> <span class="o">=</span> <span class="o">-</span><span class="n">result</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solution_class</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span> 
+                                <span class="n">bias</span><span class="p">,</span> 
+                                <span class="n">dual_solution</span><span class="p">,</span> 
+                                <span class="bp">self</span><span class="o">.</span><span class="n">_solution_status</span><span class="p">,</span>
+                                <span class="n">duality_gap</span><span class="p">,</span> 
+                                <span class="n">objective_value</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="LassoProblem"><a class="viewcode-back" href="../../api.html#blitzml.LassoProblem">[docs]</a><span class="k">class</span> <span class="nc">LassoProblem</span><span class="p">(</span><span class="n">SparseLinearProblem</span><span class="p">):</span>
+  <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Class for training sparse linear models with squared loss.</span>
+<span class="sd">  The optimization objective is</span>
+
+<span class="sd">  .. math::</span>
+
+<span class="sd">    \tfrac{1}2 ||A w - b||^2 + \lambda ||w||_1 .</span>
+
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  A : numpy.ndarray or scipy.sparse matrix</span>
+<span class="sd">    n x d design matrix.</span>
+
+<span class="sd">  b : numpy.ndarray</span>
+<span class="sd">    Labels array of length n.</span>
+
+
+<span class="sd">  Blitz tries its best to avoid copying data, but depending on the formats of A</span>
+<span class="sd">  and b, Blitz may make a copy of these arrays. To avoid copying, follow these</span>
+<span class="sd">  guidelines:</span>
+
+<span class="sd">  * If A is dense (numpy.ndarray), define A as an `F-contiguous array</span>
+<span class="sd">    &lt;https://docs.scipy.org/doc/numpy/reference/generated/numpy.asfortranarray.html&gt;`_.</span>
+<span class="sd">    The dtype for A should match ctypes.c_double, ctypes.c_float, ctypes.c_int, </span>
+<span class="sd">    or ctypes.c_bool---that is, ``A.dtype == ctypes.c_double`` evaluates to </span>
+<span class="sd">    True, for example.</span>
+
+<span class="sd">  * If A is sparse, define A as a scipy.sparse.csc_matrix. The dtype for</span>
+<span class="sd">    A.indices should match type ctypes.c_int. The dtype for A.indptr should</span>
+<span class="sd">    match type ctypes.c_size_t. BlitzML can work with double, float, int, and</span>
+<span class="sd">    bool dtypes for A.data without copying.</span>
+
+<span class="sd">  * The dtype for b should match type ctypes.c_double.</span>
+
+<span class="sd">  BlitzML will print a warning when objects with more than 1e7 elements </span>
+<span class="sd">  are being copied.  To suppress warnings, use ``blitzml.suppress_warnings()``. </span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">_solution_class</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">LassoSolution</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">_loss_index</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="mf">0.</span>
+
+  <span class="k">def</span> <span class="nf">_check_data_inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">SparseLinearProblem</span><span class="o">.</span><span class="n">_check_data_inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="n">check_regression_labels</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dataset</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_set_solver_c</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_solver_c_wrap</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_new_lasso_solver_wrapper</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="SparseHuberProblem"><a class="viewcode-back" href="../../api.html#blitzml.SparseHuberProblem">[docs]</a><span class="k">class</span> <span class="nc">SparseHuberProblem</span><span class="p">(</span><span class="n">SparseLinearProblem</span><span class="p">):</span>
+  <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Class for training sparse linear models with huber loss.</span>
+<span class="sd">  The optimization objective is</span>
+
+<span class="sd">  .. math::</span>
+
+<span class="sd">    \sum_i L(a_i^T w, b_i) + \lambda ||w||_1 ,  </span>
+<span class="sd"> </span>
+<span class="sd">  where</span>
+<span class="sd">  </span>
+<span class="sd">  .. math::</span>
+
+<span class="sd">    L(a_i^T w, b_i) = \left\{</span>
+<span class="sd">    \begin{array}{lll}</span>
+<span class="sd">      \tfrac{1}2 (a_i^T w - b_i)^2 &amp; &amp; \text{if}\ |a_i^T w - b_i| &lt; 1  \\[0.4em]</span>
+<span class="sd">      a_i^T w - b_i - \onehalf     &amp; &amp; \text{if}\ a_i^T w - b_i \geq 1 \\[0.4em]</span>
+<span class="sd">      b_i - a_i^T w - \onehalf     &amp; &amp; \text{otherwise.} </span>
+<span class="sd">    \end{array} \right.</span>
+
+<span class="sd">  Here i indexes the ith row in A and ith entry in b.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">_solution_class</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">SparseHuberSolution</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">_loss_index</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="mf">1.</span>
+
+  <span class="k">def</span> <span class="nf">_check_data_inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">SparseLinearProblem</span><span class="o">.</span><span class="n">_check_data_inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="n">check_regression_labels</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dataset</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SparseLogisticRegressionProblem"><a class="viewcode-back" href="../../api.html#blitzml.SparseLogisticRegressionProblem">[docs]</a><span class="k">class</span> <span class="nc">SparseLogisticRegressionProblem</span><span class="p">(</span><span class="n">SparseLinearProblem</span><span class="p">):</span>
+  <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Class for training sparse linear models with logistic loss.</span>
+<span class="sd">  The optimization objective is</span>
+
+<span class="sd">  .. math::</span>
+
+<span class="sd">    \sum_i \log(1 + \exp(-b_i a_i^T w)) + \lambda ||w||_1 ,</span>
+
+<span class="sd">  where i indexes the ith row in A and ith entry in b.  Each label should have</span>
+<span class="sd">  value 1, -1, or somewhere in between.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">_solution_class</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">SparseLogisticRegressionSolution</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">_loss_index</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="mf">2.</span>
+
+  <span class="k">def</span> <span class="nf">_check_data_inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">SparseLinearProblem</span><span class="o">.</span><span class="n">_check_data_inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="n">check_classification_labels</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dataset</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_set_solver_c</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_solver_c_wrap</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_new_sparse_logreg_solver_wrapper</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="SparseSquaredHingeProblem"><a class="viewcode-back" href="../../api.html#blitzml.SparseSquaredHingeProblem">[docs]</a><span class="k">class</span> <span class="nc">SparseSquaredHingeProblem</span><span class="p">(</span><span class="n">SparseLinearProblem</span><span class="p">):</span>
+  <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Class for training sparse linear models with squared hinge loss.</span>
+<span class="sd">  The optimization objective is</span>
+
+<span class="sd">  .. math::</span>
+
+<span class="sd">    \sum_i \onehalf (1 - b_i a_i^T w)_+^2 + \lambda ||w||_1 ,</span>
+
+<span class="sd">  where the &quot;+&quot; subscript denotes the rectifier function.  Each label should </span>
+<span class="sd">  have value 1 or -1.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">_solution_class</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">SparseSquaredHingeSolution</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">_loss_index</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="mf">3.</span>
+
+  <span class="k">def</span> <span class="nf">_check_data_inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">SparseLinearProblem</span><span class="o">.</span><span class="n">_check_data_inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="n">check_classification_labels</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dataset</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SparseSmoothedHingeProblem"><a class="viewcode-back" href="../../api.html#blitzml.SparseSmoothedHingeProblem">[docs]</a><span class="k">class</span> <span class="nc">SparseSmoothedHingeProblem</span><span class="p">(</span><span class="n">SparseLinearProblem</span><span class="p">):</span>
+  <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Class for training sparse linear models with smoothed hinge loss.</span>
+<span class="sd">  The optimization objective is</span>
+
+<span class="sd">  .. math::</span>
+
+<span class="sd">    \sum_i L(a_i^T w, b_i) + \lambda ||w||_1 ,  </span>
+<span class="sd"> </span>
+<span class="sd">  where</span>
+<span class="sd">  </span>
+<span class="sd">  .. math::</span>
+
+<span class="sd">    L(a_i^T w, b_i) = \left\{</span>
+<span class="sd">    \begin{array}{lll}</span>
+<span class="sd">      \onehalf - b_i a_i^T w       &amp;&amp; \text{if}\ b_i a_i^T w &lt; 0       \\[0.4em]</span>
+<span class="sd">      \onehalf (1 - b_i a_i^T w)^2 &amp;&amp; \text{if}\ b_i a_i^T w \in [0,1) \\[0.4em]</span>
+<span class="sd">      0                            &amp;&amp; \text{otherwise.} </span>
+<span class="sd">    \end{array} \right.</span>
+
+<span class="sd">  Each label should have value 1 or -1.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">_solution_class</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">SparseSmoothedHingeSolution</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">_loss_index</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="mf">4.</span>
+
+  <span class="k">def</span> <span class="nf">_check_data_inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">SparseLinearProblem</span><span class="o">.</span><span class="n">_check_data_inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="n">check_classification_labels</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dataset</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="LassoSolution"><a class="viewcode-back" href="../../api.html#blitzml.LassoSolution">[docs]</a><span class="k">class</span> <span class="nc">LassoSolution</span><span class="p">(</span><span class="n">RegressionSolution</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Solution class for ``LassoProblem``.&quot;&quot;&quot;</span>
+
+  <span class="k">def</span> <span class="nf">_compute_loss</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Aw</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+    <span class="n">loss</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">Aw</span> <span class="o">-</span> <span class="n">b</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+    <span class="k">return</span> <span class="n">loss</span></div>
+
+
+<div class="viewcode-block" id="SparseHuberSolution"><a class="viewcode-back" href="../../api.html#blitzml.SparseHuberSolution">[docs]</a><span class="k">class</span> <span class="nc">SparseHuberSolution</span><span class="p">(</span><span class="n">RegressionSolution</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Solution class for ``SparseHuberProblem``.&quot;&quot;&quot;</span>
+  <span class="k">def</span> <span class="nf">_compute_loss</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Aw</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+    <span class="n">width</span> <span class="o">=</span> <span class="mf">1.</span>
+    <span class="n">residuals</span> <span class="o">=</span> <span class="n">Aw</span> <span class="o">-</span> <span class="n">b</span>
+    <span class="n">one_half_width_sq</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">width</span> <span class="o">**</span> <span class="mi">2</span>
+    
+    <span class="n">left</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="o">-</span><span class="n">width</span> <span class="o">*</span> <span class="n">residuals</span><span class="p">[</span><span class="n">residuals</span> <span class="o">&lt;</span> <span class="o">-</span><span class="n">width</span><span class="p">]</span> <span class="o">-</span> <span class="n">one_half_width_sq</span><span class="p">)</span>
+    <span class="n">residuals</span><span class="p">[</span><span class="n">residuals</span> <span class="o">&lt;</span> <span class="o">-</span><span class="n">width</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.</span>
+
+    <span class="n">right</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">width</span> <span class="o">*</span> <span class="n">residuals</span><span class="p">[</span><span class="n">residuals</span> <span class="o">&gt;</span> <span class="n">width</span><span class="p">]</span> <span class="o">-</span> <span class="n">one_half_width_sq</span><span class="p">)</span>
+    <span class="n">residuals</span><span class="p">[</span><span class="n">residuals</span> <span class="o">&gt;</span> <span class="n">width</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.</span>
+
+    <span class="n">middle</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">residuals</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.5</span>
+    
+    <span class="k">return</span> <span class="n">left</span> <span class="o">+</span> <span class="n">middle</span> <span class="o">+</span> <span class="n">right</span></div>
+
+
+<div class="viewcode-block" id="SparseLogisticRegressionSolution"><a class="viewcode-back" href="../../api.html#blitzml.SparseLogisticRegressionSolution">[docs]</a><span class="k">class</span> <span class="nc">SparseLogisticRegressionSolution</span><span class="p">(</span><span class="n">ClassificationSolution</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Solution class for ``SparseLogisticRegressionProblem``.&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="SparseLogisticRegressionSolution.predict_probabilities"><a class="viewcode-back" href="../../api.html#blitzml.SparseLogisticRegressionSolution.predict_probabilities">[docs]</a>  <span class="k">def</span> <span class="nf">predict_probabilities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">A</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Predict probability values from feature vectors.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    A : numpy.ndarray or scipy.sparse matrix</span>
+<span class="sd">      n x d design matrix to predict probabilities for.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    predicted_probabilities : numpy.ndarray (length n with values in [0, 1]).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">Aw</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_A_times_weights</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+    <span class="n">probs</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">Aw</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">probs</span></div>
+
+  <span class="k">def</span> <span class="nf">_compute_loss</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Aw</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log1p</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">b</span> <span class="o">*</span> <span class="n">Aw</span><span class="p">)))</span></div>
+
+
+<div class="viewcode-block" id="SparseSquaredHingeSolution"><a class="viewcode-back" href="../../api.html#blitzml.SparseSquaredHingeSolution">[docs]</a><span class="k">class</span> <span class="nc">SparseSquaredHingeSolution</span><span class="p">(</span><span class="n">ClassificationSolution</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Solution class for ``SparseSquaredHingeProblem``.  &quot;&quot;&quot;</span>
+
+  <span class="k">def</span> <span class="nf">_compute_loss</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Aw</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+    <span class="n">loss_terms</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">b</span> <span class="o">*</span> <span class="n">Aw</span>
+    <span class="n">loss_terms</span><span class="p">[</span><span class="n">loss_terms</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.</span>
+    <span class="k">return</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">loss_terms</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SparseSmoothedHingeSolution"><a class="viewcode-back" href="../../api.html#blitzml.SparseSmoothedHingeSolution">[docs]</a><span class="k">class</span> <span class="nc">SparseSmoothedHingeSolution</span><span class="p">(</span><span class="n">ClassificationSolution</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Solution class for ``SparseSquaredHingeProblem``.  &quot;&quot;&quot;</span>
+
+  <span class="k">def</span> <span class="nf">_compute_loss</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Aw</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+    <span class="n">loss_terms</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">b</span> <span class="o">*</span> <span class="n">Aw</span>
+    <span class="n">loss_terms</span><span class="p">[</span><span class="n">loss_terms</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.</span>
+    <span class="n">squared_examples</span> <span class="o">=</span> <span class="p">(</span><span class="n">loss_terms</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">squared_loss</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">loss_terms</span><span class="p">[</span><span class="n">squared_examples</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">linear_examples</span> <span class="o">=</span> <span class="p">(</span><span class="n">loss_terms</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">linear_loss</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">loss_terms</span><span class="p">[</span><span class="n">linear_examples</span><span class="p">]</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">squared_loss</span> <span class="o">+</span> <span class="n">linear_loss</span></div>
+
+
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Tyler Johnson.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

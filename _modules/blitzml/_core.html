@@ -1,0 +1,725 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>blitzml._core &mdash; BlitzML 0.0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="https://media.readthedocs.org/css/sphinx_rtd_theme.css" type="text/css" />
+  
+    <link rel="stylesheet" href="https://media.readthedocs.org/css/readthedocs-doc-embed.css" type="text/css" />
+  
+    <link rel="stylesheet" href="../../_static/extra.css" type="text/css" />
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="BlitzML 0.0.1 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> BlitzML
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">BlitzML API reference</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">BlitzML</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>blitzml._core</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for blitzml._core</h1><div class="highlight"><pre>
+<span></span><span class="c1"># coding: utf-8</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">ctypes</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span> 
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="k">import</span> <span class="n">sparse</span> <span class="k">as</span> <span class="n">sp</span>
+<span class="kn">import</span> <span class="nn">pickle</span>
+<span class="kn">import</span> <span class="nn">glob</span>
+
+<span class="kn">from</span> <span class="nn">._lib_file_extension</span> <span class="k">import</span> <span class="n">get_lib_file_extension</span>
+
+<span class="k">def</span> <span class="nf">load_library</span><span class="p">():</span>
+  <span class="n">current_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
+  <span class="n">glob_string</span> <span class="o">=</span> <span class="s2">&quot;**libblitzml.</span><span class="si">{}</span><span class="s2">*&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">get_lib_file_extension</span><span class="p">())</span>
+  <span class="n">glob_pathname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">current_dir</span><span class="p">,</span> <span class="n">glob_string</span><span class="p">)</span>
+  <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">glob_pathname</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">ctypeslib</span><span class="o">.</span><span class="n">load_library</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;/&quot;</span><span class="p">)</span>    
+    <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+      <span class="k">pass</span>
+  <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Could not load C library&quot;</span><span class="p">)</span>
+  
+<span class="n">lib</span> <span class="o">=</span> <span class="n">load_library</span><span class="p">()</span>
+
+<span class="n">index_t</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_int</span>
+<span class="n">value_t</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_double</span>
+<span class="n">float_t</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_float</span>
+<span class="n">double_t</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_double</span>
+<span class="n">int_t</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_int</span>
+<span class="n">unsigned_t</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_uint</span>
+<span class="n">bool_t</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_bool</span>
+<span class="n">long_t</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_long</span>
+<span class="n">size_t</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_size_t</span>
+
+<span class="n">pointer_t</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_void_p</span><span class="p">)</span>
+<span class="n">value_t_p</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">value_t</span><span class="p">)</span>
+<span class="n">index_t_p</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">index_t</span><span class="p">)</span>
+<span class="n">float_t_p</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">float_t</span><span class="p">)</span>
+<span class="n">double_t_p</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">double_t</span><span class="p">)</span>
+<span class="n">int_t_p</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">int_t</span><span class="p">)</span>
+<span class="n">bool_t_p</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">bool_t</span><span class="p">)</span>
+<span class="n">size_t_p</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">size_t</span><span class="p">)</span>
+<span class="n">char_p</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_char_p</span>
+
+<span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_solve_problem</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">pointer_t</span><span class="p">,</span> <span class="n">pointer_t</span><span class="p">,</span> <span class="n">pointer_t</span><span class="p">,</span> <span class="n">value_t_p</span><span class="p">,</span> <span class="n">char_p</span><span class="p">,</span> <span class="n">char_p</span><span class="p">]</span>
+<span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_new_parameters</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="n">pointer_t</span>
+<span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_new_parameters</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">value_t_p</span><span class="p">,</span> <span class="n">size_t</span><span class="p">]</span>
+<span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_first_parameter</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="n">value_t</span>
+<span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_first_parameter</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">pointer_t</span><span class="p">]</span>
+<span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_delete_parameters</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_delete_parameters</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">pointer_t</span><span class="p">]</span>
+<span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_delete_solver</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_delete_solver</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">pointer_t</span><span class="p">]</span>
+<span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_set_tolerance</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_set_tolerance</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">pointer_t</span><span class="p">,</span> <span class="n">value_t</span><span class="p">]</span>
+<span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_tolerance</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="n">value_t</span>
+<span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_tolerance</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_set_max_time</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_set_max_time</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">pointer_t</span><span class="p">,</span> <span class="n">value_t</span><span class="p">]</span>
+<span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_max_time</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="n">value_t</span>
+<span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_max_time</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_set_min_time</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_set_min_time</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">pointer_t</span><span class="p">,</span> <span class="n">value_t</span><span class="p">]</span>
+<span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_min_time</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="n">value_t</span>
+<span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_min_time</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_set_verbose</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_set_verbose</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">pointer_t</span><span class="p">,</span> <span class="n">bool_t</span><span class="p">]</span>
+<span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_verbose</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="n">bool_t</span>
+<span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_verbose</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_set_use_screening</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_set_use_screening</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">pointer_t</span><span class="p">,</span> <span class="n">bool_t</span><span class="p">]</span>
+<span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_use_screening</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="n">bool_t</span>
+<span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_use_screening</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_set_use_working_sets</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_set_use_working_sets</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">pointer_t</span><span class="p">,</span> <span class="n">bool_t</span><span class="p">]</span>
+<span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_use_working_sets</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="n">bool_t</span>
+<span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_use_working_sets</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_set_log_vectors</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_set_log_vectors</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">pointer_t</span><span class="p">,</span> <span class="n">bool_t</span><span class="p">]</span>
+<span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_set_suppress_warnings</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_set_suppress_warnings</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">pointer_t</span><span class="p">,</span> <span class="n">bool_t</span><span class="p">]</span>
+<span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_log_vectors</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="n">bool_t</span>
+<span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_log_vectors</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_set_max_iterations</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_set_max_iterations</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">pointer_t</span><span class="p">,</span> <span class="n">unsigned_t</span><span class="p">]</span>
+<span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_max_iterations</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="n">unsigned_t</span>
+<span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_max_iterations</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="k">class</span> <span class="nc">CPointerWrapper</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">c_pointer</span><span class="p">,</span> <span class="n">create_func</span><span class="p">,</span> <span class="n">delete_func</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">c_pointer</span> <span class="o">=</span> <span class="n">c_pointer</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_create_func</span> <span class="o">=</span> <span class="n">create_func</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_delete_c_obj</span> <span class="o">=</span> <span class="n">delete_func</span>
+
+  <span class="k">def</span> <span class="nf">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_delete_c_obj</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">c_pointer</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">wrap_new_call</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">delete_func</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">new_func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="n">obj</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">obj_wrapper</span> <span class="o">=</span> <span class="n">CPointerWrapper</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">delete_func</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">obj_wrapper</span>
+  <span class="k">return</span> <span class="n">new_func</span>
+
+<span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_new_parameters_wrap</span> <span class="o">=</span> <span class="n">wrap_new_call</span><span class="p">(</span><span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_new_parameters</span><span class="p">,</span>
+                                                <span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_delete_parameters</span><span class="p">)</span>
+
+<span class="n">new_solver_calls</span> <span class="o">=</span> <span class="p">[</span><span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_new_sparse_linear_solver</span><span class="p">,</span>
+                    <span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_new_lasso_solver</span><span class="p">,</span>
+                    <span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_new_sparse_logreg_solver</span><span class="p">]</span>
+<span class="k">for</span> <span class="n">call</span> <span class="ow">in</span> <span class="n">new_solver_calls</span><span class="p">:</span>
+  <span class="n">call</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="n">call</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="n">pointer_t</span>
+  <span class="n">wrapper_call_name</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">_wrapper&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">call</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+  <span class="nb">setattr</span><span class="p">(</span><span class="n">lib</span><span class="p">,</span> <span class="n">wrapper_call_name</span><span class="p">,</span> <span class="n">wrap_new_call</span><span class="p">(</span><span class="n">call</span><span class="p">,</span> <span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_delete_solver</span><span class="p">))</span>
+  
+
+<span class="n">_module_vars</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;warnings_suppressed&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">}</span>
+
+<span class="k">def</span> <span class="nf">add_line_breaks</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+  <span class="n">max_chars</span> <span class="o">=</span> <span class="mi">79</span>
+  <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">message</span><span class="o">.</span><span class="n">split</span><span class="p">():</span>
+    <span class="n">length</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">w</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="n">length</span> <span class="o">&gt;</span> <span class="n">max_chars</span><span class="p">:</span>
+      <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+      <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">w</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">w</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span><span class="p">)</span>
+  <span class="k">return</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">result</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+<span class="k">def</span> <span class="nf">print_if_not_suppressed</span><span class="p">(</span><span class="n">message</span><span class="p">):</span>
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">_module_vars</span><span class="p">[</span><span class="s2">&quot;warnings_suppressed&quot;</span><span class="p">]:</span>
+    <span class="n">message</span> <span class="o">=</span> <span class="n">add_line_breaks</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+    
+<span class="k">def</span> <span class="nf">warn</span><span class="p">(</span><span class="n">message</span><span class="p">):</span>
+  <span class="n">print_if_not_suppressed</span><span class="p">(</span><span class="s2">&quot;Warning: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">message</span><span class="p">))</span>
+
+<span class="k">def</span> <span class="nf">value_error</span><span class="p">(</span><span class="n">message</span><span class="p">):</span>
+  <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">add_line_breaks</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">12</span><span class="p">))</span>
+
+<div class="viewcode-block" id="suppress_warnings"><a class="viewcode-back" href="../../api.html#blitzml._sparse_linear.suppress_warnings">[docs]</a><span class="k">def</span> <span class="nf">suppress_warnings</span><span class="p">():</span>
+  <span class="sd">&quot;&quot;&quot;Stop BlitzML from printing warning messages to sys.stdout. By default, </span>
+<span class="sd">  warning messages are unsuppressed.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="n">_module_vars</span><span class="p">[</span><span class="s2">&quot;warnings_suppressed&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+<div class="viewcode-block" id="unsuppress_warnings"><a class="viewcode-back" href="../../api.html#blitzml._sparse_linear.unsuppress_warnings">[docs]</a><span class="k">def</span> <span class="nf">unsuppress_warnings</span><span class="p">():</span>
+  <span class="sd">&quot;&quot;&quot;Allow BlitzML to print warning messages to sys.stdout.&quot;&quot;&quot;</span>
+  <span class="n">_module_vars</span><span class="p">[</span><span class="s2">&quot;warnings_suppressed&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span></div>
+
+<span class="n">data_copy_warning_cutoff</span> <span class="o">=</span> <span class="mf">1e7</span>
+
+
+<span class="k">def</span> <span class="nf">data_as</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">ctypes_type</span><span class="p">):</span>
+  <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">dtype</span> <span class="o">!=</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="n">ctypes_type</span><span class="p">):</span>
+    <span class="n">nnz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">nnz</span> <span class="o">&gt;</span> <span class="n">data_copy_warning_cutoff</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Copying numpy.ndarray of size </span><span class="si">{:d}</span><span class="s2"> from type </span><span class="si">{}</span><span class="s2"> to </span><span class="si">{}</span><span class="s2">. &quot;</span>
+             <span class="s2">&quot;Refer to documentation for tips on avoiding copying.&quot;</span><span class="p">)</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="n">msg</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">nnz</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">ctypes_type</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+      <span class="n">warn</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+    <span class="n">obj</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">ctypes_type</span><span class="p">)</span>
+  <span class="k">return</span> <span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">ctypes</span><span class="o">.</span><span class="n">data_as</span><span class="p">(</span><span class="n">ctypes_type</span><span class="p">))</span>
+
+
+<span class="k">def</span> <span class="nf">decode_c_char_array</span><span class="p">(</span><span class="n">c_char_array</span><span class="p">):</span>
+  <span class="k">return</span> <span class="n">c_char_array</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span>
+
+
+<span class="k">class</span> <span class="nc">Problem</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+  <span class="k">def</span> <span class="nf">_set_solver_options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+      <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">k</span><span class="p">),</span> <span class="n">v</span><span class="p">)</span>
+    <span class="n">suppress_warnings_</span> <span class="o">=</span> <span class="n">_module_vars</span><span class="p">[</span><span class="s2">&quot;warnings_suppressed&quot;</span><span class="p">]</span>
+    <span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_set_suppress_warnings</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_solver_c_wrap</span><span class="o">.</span><span class="n">c_pointer</span><span class="p">,</span> 
+                                      <span class="n">bool_t</span><span class="p">(</span><span class="n">suppress_warnings_</span><span class="p">))</span>
+
+  <span class="k">def</span> <span class="nf">_set_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="p">):</span>
+    <span class="n">num_params_c</span> <span class="o">=</span> <span class="n">size_t</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">parameters</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">,</span> <span class="n">params_array_c</span> <span class="o">=</span> <span class="n">data_as</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> <span class="n">value_t_p</span><span class="p">)</span>
+    <span class="n">_parameters_c_wrap</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_new_parameters_wrap</span><span class="p">(</span><span class="n">params_array_c</span><span class="p">,</span> <span class="n">num_params_c</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">_parameters_c_wrap</span>
+
+  <span class="k">def</span> <span class="nf">_set_result</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">result</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_result</span><span class="p">,</span> <span class="n">result_c</span> <span class="o">=</span> <span class="n">data_as</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">value_t_p</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">result_c</span>
+
+  <span class="k">def</span> <span class="nf">_setup_solution_status</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_solution_status</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">create_string_buffer</span><span class="p">(</span><span class="sa">b</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">64</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solution_status</span>
+
+  <span class="k">def</span> <span class="nf">_set_log_directory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">log_directory</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">log_directory</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="n">log_directory</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">check_log_directory</span><span class="p">(</span><span class="n">log_directory</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_log_directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">log_directory</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">char_p</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_log_directory</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf8&quot;</span><span class="p">))</span>
+
+  <span class="k">def</span> <span class="nf">_format_solution_status</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_solution_status</span> <span class="o">=</span> <span class="n">decode_c_char_array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_solution_status</span><span class="p">)</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">_stopping_tolerance</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Stopping tolerance for solve.  Optimization terminates if</span>
+<span class="sd">        duality_gap / objective_value &lt; stopping_tolerance .</span>
+
+<span class="sd">    Default is 1e-3.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_tolerance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_solver_c_wrap</span><span class="o">.</span><span class="n">c_pointer</span><span class="p">)</span>
+
+  <span class="nd">@_stopping_tolerance</span><span class="o">.</span><span class="n">setter</span>
+  <span class="k">def</span> <span class="nf">_stopping_tolerance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_set_tolerance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_solver_c_wrap</span><span class="o">.</span><span class="n">c_pointer</span><span class="p">,</span> <span class="n">value_t</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">_max_time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Time limit in seconds for solve call. If stopping tolerance is not </span>
+<span class="sd">    reached, optimization terminates after this number of seconds.  Default is </span>
+<span class="sd">    1 year.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_max_time</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_solver_c_wrap</span><span class="o">.</span><span class="n">c_pointer</span><span class="p">)</span>
+
+  <span class="nd">@_max_time</span><span class="o">.</span><span class="n">setter</span>
+  <span class="k">def</span> <span class="nf">_max_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_set_max_time</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_solver_c_wrap</span><span class="o">.</span><span class="n">c_pointer</span><span class="p">,</span> <span class="n">value_t</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">_max_iterations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Iterations limit for solve call. If stopping tolerance is not reached </span>
+<span class="sd">    after this number of iterations, optimization terminates.  Default is </span>
+<span class="sd">    100000.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_max_iterations</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_solver_c_wrap</span><span class="o">.</span><span class="n">c_pointer</span><span class="p">)</span>
+
+  <span class="nd">@_max_iterations</span><span class="o">.</span><span class="n">setter</span>
+  <span class="k">def</span> <span class="nf">_max_iterations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_set_max_iterations</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_solver_c_wrap</span><span class="o">.</span><span class="n">c_pointer</span><span class="p">,</span> <span class="n">unsigned_t</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">_min_time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Minimum time in seconds for solve call.  Optimization continues until </span>
+<span class="sd">    this amount of time passes, even after reaching stopping tolerance.  </span>
+<span class="sd">    Default is zero.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_min_time</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_solver_c_wrap</span><span class="o">.</span><span class="n">c_pointer</span><span class="p">)</span>
+
+  <span class="nd">@_min_time</span><span class="o">.</span><span class="n">setter</span>
+  <span class="k">def</span> <span class="nf">_min_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_set_min_time</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_solver_c_wrap</span><span class="o">.</span><span class="n">c_pointer</span><span class="p">,</span> <span class="n">value_t</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">_verbose</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;If True, algorithm prints convergence info (such as objective value) to</span>
+<span class="sd">    stdout after each iteration during solve call.  Default is False.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_verbose</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_solver_c_wrap</span><span class="o">.</span><span class="n">c_pointer</span><span class="p">)</span>
+
+  <span class="nd">@_verbose</span><span class="o">.</span><span class="n">setter</span>
+  <span class="k">def</span> <span class="nf">_verbose</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_set_verbose</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_solver_c_wrap</span><span class="o">.</span><span class="n">c_pointer</span><span class="p">,</span> <span class="n">bool_t</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">_use_working_sets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;If True, BlitzML solves the problem using working sets.  Default is </span>
+<span class="sd">    True.  Setting to False likely results in slower optimization.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_use_working_sets</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_solver_c_wrap</span><span class="o">.</span><span class="n">c_pointer</span><span class="p">)</span>
+
+  <span class="nd">@_use_working_sets</span><span class="o">.</span><span class="n">setter</span>
+  <span class="k">def</span> <span class="nf">_use_working_sets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_set_use_working_sets</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_solver_c_wrap</span><span class="o">.</span><span class="n">c_pointer</span><span class="p">,</span> <span class="n">bool_t</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">_use_screening</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;If True, BlitzML solves the problem using safe screening.  Default is </span>
+<span class="sd">    True.  Setting to False may result in slower optimization.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_use_screening</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_solver_c_wrap</span><span class="o">.</span><span class="n">c_pointer</span><span class="p">)</span>
+
+  <span class="nd">@_use_screening</span><span class="o">.</span><span class="n">setter</span>
+  <span class="k">def</span> <span class="nf">_use_screening</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_set_use_screening</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_solver_c_wrap</span><span class="o">.</span><span class="n">c_pointer</span><span class="p">,</span> <span class="n">bool_t</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">_log_vectors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;If True, BlitzML solves the problem using working sets.  Default is </span>
+<span class="sd">    True.  Setting to False likely results in slower optimization.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_log_vectors</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_solver_c_wrap</span><span class="o">.</span><span class="n">c_pointer</span><span class="p">)</span>
+
+  <span class="nd">@_log_vectors</span><span class="o">.</span><span class="n">setter</span>
+  <span class="k">def</span> <span class="nf">_log_vectors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_set_log_vectors</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_solver_c_wrap</span><span class="o">.</span><span class="n">c_pointer</span><span class="p">,</span> <span class="n">bool_t</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+
+
+<span class="k">class</span> <span class="nc">BlitzMLSolution</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">bias</span><span class="p">,</span> <span class="n">dual_solution</span><span class="p">,</span> 
+               <span class="n">status</span><span class="p">,</span> <span class="n">duality_gap</span><span class="p">,</span> <span class="n">objective_value</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_weights</span> <span class="o">=</span> <span class="n">weights</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_bias</span> <span class="o">=</span> <span class="n">bias</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_dual_solution</span> <span class="o">=</span> <span class="n">dual_solution</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_objective_value</span> <span class="o">=</span> <span class="n">objective_value</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_duality_gap</span> <span class="o">=</span> <span class="n">duality_gap</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_solution_status</span> <span class="o">=</span> <span class="n">status</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">weights</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Array of model&#39;s weight values.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_weights</span>
+
+  <span class="nd">@weights</span><span class="o">.</span><span class="n">setter</span>
+  <span class="k">def</span> <span class="nf">weights</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_weights</span> <span class="o">=</span> <span class="n">weights</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">bias</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Value of model&#39;s bias term.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bias</span>
+
+  <span class="nd">@bias</span><span class="o">.</span><span class="n">setter</span>
+  <span class="k">def</span> <span class="nf">bias</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_bias</span> <span class="o">=</span> <span class="n">bias</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">dual_solution</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Dual solution to optimization problem.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dual_solution</span>
+
+  <span class="nd">@dual_solution</span><span class="o">.</span><span class="n">setter</span>
+  <span class="k">def</span> <span class="nf">dual_solution</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_dual_solution</span> <span class="o">=</span> <span class="n">dual_solution</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">objective_value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Objective value of solution.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_objective_value</span>
+
+  <span class="nd">@objective_value</span><span class="o">.</span><span class="n">setter</span>
+  <span class="k">def</span> <span class="nf">objective_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_objective_value</span> <span class="o">=</span> <span class="n">objective_value</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">duality_gap</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Duality gap between primal and dual solutions (which upper bounds the</span>
+<span class="sd">    suboptimality of these solutions).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_duality_gap</span>
+
+  <span class="nd">@duality_gap</span><span class="o">.</span><span class="n">setter</span>
+  <span class="k">def</span> <span class="nf">duality_gap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_duality_gap</span> <span class="o">=</span> <span class="n">duality_gap</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">solution_status</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Status of Blitz algorithm upon returning model.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solution_status</span>
+
+  <span class="nd">@solution_status</span><span class="o">.</span><span class="n">setter</span>
+  <span class="k">def</span> <span class="nf">solution_status</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_solution_status</span> <span class="o">=</span> <span class="n">solution_status</span>
+
+  <span class="k">def</span> <span class="nf">compute_loss</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Compute the sum </span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">         \sum_i L(a_i^T w, b_i) ,</span>
+
+<span class="sd">    where L is the problem&#39;s loss function.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    A : numpy.ndarray or scipy.sparse matrix</span>
+<span class="sd">      n x d design matrix for evaluating loss.</span>
+
+<span class="sd">    b : numpy.ndarray</span>
+<span class="sd">      Corresponding labels array of length n.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    loss : float</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">Aw</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_A_times_weights</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_loss</span><span class="p">(</span><span class="n">Aw</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Save model to disk.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    filepath : string</span>
+<span class="sd">      Location to save solution.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">outfile</span><span class="p">:</span>
+      <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outfile</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_compute_A_times_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">A</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">sp</span><span class="o">.</span><span class="n">issparse</span><span class="p">(</span><span class="n">A</span><span class="p">):</span>
+      <span class="n">result</span> <span class="o">=</span> <span class="n">A</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">mat</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="p">)</span><span class="o">.</span><span class="n">T</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">bias</span>
+      <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">result</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">weights</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">bias</span>
+
+
+<span class="k">class</span> <span class="nc">RegressionSolution</span><span class="p">(</span><span class="n">BlitzMLSolution</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">A</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Predict label values from feature vectors.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    A : numpy.ndarray or scipy.sparse matrix</span>
+<span class="sd">      n x d design matrix to make predictions for.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    predictions : numpy.ndarray of length n.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_A_times_weights</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">ClassificationSolution</span><span class="p">(</span><span class="n">BlitzMLSolution</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">A</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Predict label values from feature vectors.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    A : numpy.ndarray or scipy.sparse matrix</span>
+<span class="sd">      n x d design matrix to make predictions for.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    predictions : numpy.ndarray of length n containing values +/-1.0.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">preds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_A_times_weights</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+    <span class="n">preds</span><span class="p">[</span><span class="n">preds</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.</span>
+    <span class="n">preds</span><span class="p">[</span><span class="n">preds</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.</span>
+    <span class="k">return</span> <span class="n">preds</span>
+ 
+
+<div class="viewcode-block" id="load_solution"><a class="viewcode-back" href="../../api.html#blitzml._sparse_linear.load_solution">[docs]</a><span class="k">def</span> <span class="nf">load_solution</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Load BlitzMLSolution from disk.</span>
+
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  filepath : string</span>
+<span class="sd">    Path to saved solution.</span>
+
+<span class="sd">  Returns</span>
+<span class="sd">  -------</span>
+<span class="sd">  solution : BlitzMLSolution.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">solution</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+  <span class="k">return</span> <span class="n">solution</span></div>
+
+
+<span class="k">def</span> <span class="nf">check_log_directory</span><span class="p">(</span><span class="n">dir_path</span><span class="p">):</span>
+  <span class="k">if</span> <span class="n">dir_path</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+    <span class="k">return</span>
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">dir_path</span><span class="p">):</span>
+    <span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Provided log directory does not exist&quot;</span><span class="p">)</span>
+  <span class="k">elif</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">dir_path</span><span class="p">):</span>
+    <span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Starting optimization with non-empty log directory&quot;</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">check_classification_labels</span><span class="p">(</span><span class="n">dataset</span><span class="p">):</span>
+  <span class="n">min_b</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">min_b</span>
+  <span class="n">max_b</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">max_b</span>
+  <span class="k">if</span> <span class="n">min_b</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">:</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Labels vector conatins values less than -1.0, which is &quot;</span>
+           <span class="s2">&quot;unusual. Typically labels are +/-1 for classification.&quot;</span><span class="p">)</span>
+    <span class="n">warn</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">max_b</span> <span class="o">&gt;</span> <span class="mf">1.0</span><span class="p">:</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Labels vector conatins values greater than 1.0, which is &quot;</span>
+           <span class="s2">&quot;unusual. Typically labels are +/-1 for classification.&quot;</span><span class="p">)</span>
+    <span class="n">warn</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">min_b</span> <span class="o">==</span> <span class="mf">0.0</span> <span class="ow">and</span> <span class="n">max_b</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">:</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Labels vector contains only zero values.&quot;</span>
+    <span class="n">warn</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="k">return</span>
+  <span class="k">if</span> <span class="n">min_b</span> <span class="o">&gt;=</span> <span class="mf">0.</span><span class="p">:</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Labels vector contains no values less than zero, which is &quot;</span>
+           <span class="s2">&quot;unusual. Use -1 to label negative training instances.&quot;</span><span class="p">)</span>
+    <span class="n">warn</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">max_b</span> <span class="o">&lt;=</span> <span class="mf">0.</span><span class="p">:</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Labels vector contains no values greater than zero, which is &quot;</span>
+           <span class="s2">&quot;unusual. Use 1 to label positive training instances.&quot;</span><span class="p">)</span>
+    <span class="n">warn</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">check_regression_labels</span><span class="p">(</span><span class="n">dataset</span><span class="p">):</span>
+  <span class="n">min_b</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">min_b</span>
+  <span class="n">max_b</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">max_b</span>
+  <span class="k">if</span> <span class="n">min_b</span> <span class="o">==</span> <span class="mf">0.0</span> <span class="ow">and</span> <span class="n">max_b</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">:</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Labels vector contains only zero values.&quot;</span>
+    <span class="n">warn</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Tyler Johnson.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
