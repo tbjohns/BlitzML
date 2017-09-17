@@ -1,3 +1,7 @@
+.note4github {
+  display: none;
+}
+
 .icon-home::before {
   content:"\f0e7";
 }

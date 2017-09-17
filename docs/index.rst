@@ -1,3 +1,9 @@
+.. container:: note4github
+
+   If you are reading this in the GitHub navigation tree, access the rendered
+   documentation at https://tbjohns.github.io/BlitzML/ . 
+
+
 .. BlitzML documentation master file, created by
    sphinx-quickstart on Tue Sep 12 10:57:26 2017.
    You can adapt this file completely to your liking, but it should at least
