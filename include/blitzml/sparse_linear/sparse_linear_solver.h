@@ -55,8 +55,6 @@ class SparseLinearSolver : public Solver {
 
     static const int MAX_BACKTRACK_STEPS = 25;
 
-    int consecutive_alpha_eq_1;
-
     bool z_match_y;
     bool z_match_x;
 
@@ -113,6 +111,7 @@ class SparseLinearSolver : public Solver {
     void deserialize_parameters();
     void set_data_dimensions();
     virtual void initialize_blitz_variables(value_t* initial_conditions);
+    void initialize_model(value_t* initial_conditions);
     void compute_Aomega();
     void cache_feature_info();
     void initialize_proximal_newton_variables();

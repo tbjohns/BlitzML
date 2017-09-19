@@ -250,25 +250,24 @@ value_t SparseLinearSolver::update_feature(index_t working_set_ind) {
          col_ip_newton_2nd_derivative_cache[working_set_ind] * Delta_bias;
 
   value_t current_value = omega[feature_ind] + Delta_omega[working_set_ind];
-  if (current_value == 0. && fabs(grad) < l1_penalty) {
+  value_t shrunk_grad = fabs(grad) - l1_penalty;
+  if (current_value == 0. && shrunk_grad < 0) {
     return 0.;
   }
   value_t pre_shrink = current_value - grad * inv_L;
   value_t new_value = soft_threshold(pre_shrink, l1_penalty * inv_L);
-  if (new_value == current_value) {
-    return 0.;
-  }
 
   value_t delta = new_value - current_value;
   col.weighted_add_multiple(Delta_Aomega, newton_2nd_derivatives, delta);
   Delta_omega[working_set_ind] += delta;
 
   if (use_bias) {
-    value_t grad_bias = col_ip_newton_2nd_derivative_cache[working_set_ind]  * delta;
+    value_t grad_bias =
+                  col_ip_newton_2nd_derivative_cache[working_set_ind]  * delta;
     Delta_bias -= grad_bias * (1 / sum_newton_2nd_derivatives);
   }
 
-  return grad + sign(current_value) * l1_penalty;
+  return shrunk_grad;
 }
 
 
@@ -355,21 +354,20 @@ void SparseLinearSolver::perform_backtracking() {
 
 value_t SparseLinearSolver::
 compute_backtracking_step_size_derivative(value_t step_size) const {
-
   value_t derivative_loss = inner_product(Delta_Aomega, x) + Delta_bias * sum_x;
 
-  value_t derivative_regularization = 0.;
+  value_t derivative_l1 = 0.;
   for (const_index_itr ind = ws.begin_indices(); ind != ws.end_indices(); ++ind) {
     index_t i = ws.ith_member(*ind);
     value_t omega_i = omega[i] + step_size * Delta_omega[*ind];
-    if (fabs(omega_i) < 1e-14) {
-      derivative_regularization -= l1_penalty * fabs(Delta_omega[*ind]);  
+    if (omega_i == 0.) {
+      derivative_l1 -= l1_penalty * fabs(Delta_omega[*ind]);  
     } else {
-      derivative_regularization += l1_penalty * Delta_omega[*ind] * sign(omega_i);
+      derivative_l1 += l1_penalty * Delta_omega[*ind] * sign(omega_i);
     }
   }
 
-  return derivative_loss + derivative_regularization;
+  return derivative_loss + derivative_l1;
 }
 
 
@@ -397,24 +395,20 @@ void SparseLinearSolver::update_newton_2nd_derivatives(value_t epsilon_to_add) {
 
 
 void SparseLinearSolver::update_kappa_x() {
-  value_t max_abs_grad_i = l1_penalty;
+  value_t max_abs_grad = l1_penalty;
   for (const_index_itr i = ws.begin_sorted(); i != ws.end_sorted(); ++i) {
-    value_t grad_i = A_cols[*i]->inner_product(x);
-    ATx[*i] = grad_i;
-    if (fabs(grad_i) > max_abs_grad_i) {
-      max_abs_grad_i = fabs(grad_i);
+    value_t grad = A_cols[*i]->inner_product(x);
+    ATx[*i] = grad;
+    if (fabs(grad) > max_abs_grad) {
+      max_abs_grad = fabs(grad);
     }
   }
-  kappa_x = l1_penalty / max_abs_grad_i;
-  if (kappa_x >= 1.) {
-    kappa_x = 1.;
-  }
+  kappa_x = (l1_penalty < max_abs_grad) ? l1_penalty / max_abs_grad : 1.;
 }
 
 
 value_t SparseLinearSolver::compute_alpha() { 
   update_non_working_set_gradients();
-
   value_t alpha = 1.;
   for (index_t j = 0; j < num_components; ++j) {
     value_t alpha_j = compute_alpha_for_feature(j);
@@ -422,26 +416,17 @@ value_t SparseLinearSolver::compute_alpha() {
       alpha = alpha_j;
     }
   }
-
-  if (alpha == 1) {
-    ++consecutive_alpha_eq_1;
-  } else {
-    consecutive_alpha_eq_1 = 0;
-  }
-
   return alpha;
 }
 
 
 void SparseLinearSolver::update_non_working_set_gradients() {
-  // x update:
   for (index_t i = 0; i < num_components; ++i) {
     if (!ws.is_in_working_set(i)) {
       ATx[i] = A_cols[i]->inner_product(x);
     }
   }
 
-  // z update:
   if (z_match_y) {
     ATz = ATy;
   } else if (z_match_x) {
@@ -539,7 +524,8 @@ bool SparseLinearSolver::mark_components_to_screen(vector<bool> &should_screen) 
     return false;
   }
 
-  if (sq(l1_penalty) * max_inv_lipschitz_cache < thresh_sq) {
+  bool impossible_thresh = sq(l1_penalty) * max_inv_lipschitz_cache < thresh_sq;
+  if (impossible_thresh && iteration_number != 1) {
     return false;
   }
 
@@ -572,7 +558,8 @@ bool SparseLinearSolver::mark_components_to_screen(vector<bool> &should_screen) 
 }
 
 
-void SparseLinearSolver::apply_screening_result(const vector<bool> &should_screen) {
+void SparseLinearSolver::
+apply_screening_result(const vector<bool> &should_screen) {
   index_t i = 0;
   for (index_t ind = 0; ind < num_components; ++ind) {
     if (!should_screen[ind]) {
@@ -662,12 +649,8 @@ void SparseLinearSolver::set_data_dimensions() {
 
 void SparseLinearSolver::initialize_blitz_variables(
     value_t* initial_conditions) {
-  if (initial_conditions != NULL) {
-    omega.assign(initial_conditions, initial_conditions + num_components);
-  } else {
-    omega.assign(num_components, 0.);
-  }
-  bias = 0.;
+  initialize_model(initial_conditions);
+
   compute_Aomega();
 
   x.resize(num_examples);
@@ -685,11 +668,16 @@ void SparseLinearSolver::initialize_blitz_variables(
   kappa_z = 1.0;
   z_match_x = true;
   z_match_y = false;
+}
 
-  screen_indices_map.resize(num_components);
-  for (index_t i = 0; i < num_components; ++i) {
-    screen_indices_map[i] = i;
+
+void SparseLinearSolver::initialize_model(value_t* initial_conditions) {
+  if (initial_conditions != NULL) {
+    omega.assign(initial_conditions, initial_conditions + num_components);
+  } else {
+    omega.assign(num_components, 0.);
   }
+  bias = 0.;
 }
 
 
@@ -724,6 +712,11 @@ void SparseLinearSolver::cache_feature_info() {
   }
 
   max_inv_lipschitz_cache = max_vector(inv_lipschitz_cache);
+
+  screen_indices_map.resize(num_components);
+  for (index_t i = 0; i < num_components; ++i) {
+    screen_indices_map[i] = i;
+  }
 }
 
 
