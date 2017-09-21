@@ -9,30 +9,28 @@ lib.BlitzML_sparse_linear_solver_compute_max_l1_penalty.restype = value_t
 
 class SparseLinearProblem(Problem):
   def __init__(self, A, b):
+    self._check_data_inputs(A, b)
     self._dataset = Dataset(A, b) 
-    self._check_data_inputs()
     self._set_solver_c()
 
   def _set_solver_c(self):
     self._solver_c_wrap = lib.BlitzML_new_sparse_linear_solver_wrapper()
 
-  def _check_data_inputs(self):
-    A = self._dataset.A
-    b = self._dataset.b
+  def _check_data_inputs(self, A, b):
     if not sp.isspmatrix(A) and type(A) != np.ndarray:
-      msg = ("Design matrix of type {} not allowed. Type must be "
+      msg = ("Design matrix of type {} is invalid. Type must be "
              "numpy.ndarray or scipy sparse matrix.").format(type(A).__name__)
       value_error(msg)
     if type(b) != np.ndarray:
-      msg = ("Labels vector of type {} not allowed. Type must be "
+      msg = ("Labels vector of type {} is invalid. Type must be "
              "numpy.ndarray.").format(type(b).__name__)
       value_error(msg)
     if A.ndim != 2:
-      msg = ("Design matrix with shape {} not allowed. "
+      msg = ("Design matrix with shape {} is invalid. "
              "Matrix must be 2d.").format(A.shape)
       value_error(msg)
     if b.ndim != 1:
-      msg = ("Labels vector with shape {} not allowed. " 
+      msg = ("Labels vector with shape {} is invalid. " 
              "Labels must be 1d.").format(b.shape)
       value_error(msg)
     if A.shape[0] != len(b):
@@ -218,9 +216,9 @@ class LassoProblem(SparseLinearProblem):
   def _loss_index(self):
     return 0.
 
-  def _check_data_inputs(self):
-    SparseLinearProblem._check_data_inputs(self)
-    check_regression_labels(self._dataset)
+  def _check_data_inputs(self, A, b):
+    SparseLinearProblem._check_data_inputs(self, A, b)
+    check_regression_labels(b)
 
   def _set_solver_c(self):
     self._solver_c_wrap = lib.BlitzML_new_lasso_solver_wrapper()
@@ -255,9 +253,9 @@ class SparseHuberProblem(SparseLinearProblem):
   def _loss_index(self):
     return 1.
 
-  def _check_data_inputs(self):
-    SparseLinearProblem._check_data_inputs(self)
-    check_regression_labels(self._dataset)
+  def _check_data_inputs(self, A, b):
+    SparseLinearProblem._check_data_inputs(self, A, b)
+    check_regression_labels(b)
 
 
 class SparseLogisticRegressionProblem(SparseLinearProblem):
@@ -268,8 +266,9 @@ class SparseLogisticRegressionProblem(SparseLinearProblem):
 
     \sum_i \log(1 + \exp(-b_i a_i^T w)) + \lambda ||w||_1 ,
 
-  where i indexes the ith row in A and ith entry in b.  Each label should have
-  value 1, -1, or somewhere in between.
+  where i indexes the ith row in A and ith entry in b.  Each label b_i should 
+  have value 1 or -1.  BlitzML treats other label values as 1 if the value 
+  exceeds zero and -1 otherwise.
   """
   @property
   def _solution_class(self):
@@ -279,9 +278,9 @@ class SparseLogisticRegressionProblem(SparseLinearProblem):
   def _loss_index(self):
     return 2.
 
-  def _check_data_inputs(self):
-    SparseLinearProblem._check_data_inputs(self)
-    check_classification_labels(self._dataset)
+  def _check_data_inputs(self, A, b):
+    SparseLinearProblem._check_data_inputs(self, A, b)
+    check_logreg_labels(b)
 
   def _set_solver_c(self):
     self._solver_c_wrap = lib.BlitzML_new_sparse_logreg_solver_wrapper()
@@ -306,9 +305,9 @@ class SparseSquaredHingeProblem(SparseLinearProblem):
   def _loss_index(self):
     return 3.
 
-  def _check_data_inputs(self):
-    SparseLinearProblem._check_data_inputs(self)
-    check_classification_labels(self._dataset)
+  def _check_data_inputs(self, A, b):
+    SparseLinearProblem._check_data_inputs(self, A, b)
+    check_classification_labels(b)
 
 
 class SparseSmoothedHingeProblem(SparseLinearProblem):
@@ -340,9 +339,9 @@ class SparseSmoothedHingeProblem(SparseLinearProblem):
   def _loss_index(self):
     return 4.
 
-  def _check_data_inputs(self):
-    SparseLinearProblem._check_data_inputs(self)
-    check_classification_labels(self._dataset)
+  def _check_data_inputs(self, A, b):
+    SparseLinearProblem._check_data_inputs(self, A, b)
+    check_classification_labels(b)
 
 
 class LassoSolution(RegressionSolution):

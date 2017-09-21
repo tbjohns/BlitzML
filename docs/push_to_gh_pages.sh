@@ -5,8 +5,7 @@ mv html html.new
 git clone -b gh-pages https://github.com/tbjohns/BlitzML.git html
 cd html
 git rm -r .
-mv ../html.new/* .
-mv ../html.new/.* .
+mv ../html.new/{.,}* .
 touch .nojekyll
 git add .
 git commit -m "updated docs"

@@ -464,9 +464,9 @@ def check_log_directory(dir_path):
     warn("Starting optimization with non-empty log directory")
 
 
-def check_classification_labels(dataset):
-  min_b = dataset.min_b
-  max_b = dataset.max_b
+def check_classification_labels(b):
+  min_b = np.min(b)
+  max_b = np.max(b)
   if min_b < -1.0:
     msg = ("Labels vector conatins values less than -1.0, which is "
            "unusual. Typically labels are +/-1 for classification.")
@@ -488,10 +488,36 @@ def check_classification_labels(dataset):
            "unusual. Use 1 to label positive training instances.")
     warn(msg)
 
-def check_regression_labels(dataset):
-  min_b = dataset.min_b
-  max_b = dataset.max_b
-  if min_b == 0.0 and max_b == 0.0:
-    msg = "Labels vector contains only zero values."
+def check_regression_labels(b):
+  min_b = np.min(b)
+  max_b = np.max(b)
+  if min_b == max_b:
+    msg = "Labels vector contains only one unique value ({}).".format(min_b)
+    warn(msg)
+
+def check_logreg_labels(b):
+  min_b = np.min(b)
+  max_b = np.max(b)
+
+  invalid_labels = False
+  if min_b < -1.0 or max_b > 1.0:
+    invalid_labels = True
+  else:
+    unique_b = np.unique(b)
+    if len(unique_b) != 2 or set(unique_b).difference({-1, 1}):
+      invalid_labels = True
+
+  if invalid_labels:
+    msg = ("Labels vector contains values other than -1 and 1. Labels will be "
+           "treated as 1 if greater than zero and -1 otherwise.")
+    warn(msg)
+
+  if min_b > 0.:
+    msg = ("Labels vector contains no negative labels. Label negative training "
+           "instances with -1.")
+    warn(msg)
+  elif max_b <= 0.:
+    msg = ("Labels vector contains no positive labels. Label positive training "
+           "instances with 1.")
     warn(msg)
 

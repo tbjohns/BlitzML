@@ -1,7 +1,6 @@
 .. container:: note4github
 
-   If you are reading this in the GitHub navigation tree, access the rendered
-   documentation at https://tbjohns.github.io/BlitzML/ . 
+   Read the rendered documentation at https://tbjohns.github.io/BlitzML/. 
 
 
 .. BlitzML documentation master file, created by

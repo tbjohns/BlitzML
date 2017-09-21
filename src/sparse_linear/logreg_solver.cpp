@@ -232,7 +232,11 @@ value_t SparseLogRegSolver::compute_dual_obj() const {
   value_t loss = 0.;
   for (index_t j = 0; j < num_examples; ++j) {
     if (is_positive_label[j]) {
-      loss += log1p(1/exp_Aomega[j]);
+      if (Aomega[j] > -50) {
+        loss += log1p(1/exp_Aomega[j]);
+      }  else {
+        loss -= Aomega[j];
+      }
     } else {
       loss += log1p(exp_Aomega[j]);
     }

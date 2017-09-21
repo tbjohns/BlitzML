@@ -31,7 +31,8 @@ class TestLasso_1_by_1(unittest.TestCase):
   def setUp(self):
     A = np.array([[2]], dtype=np.float)
     b = np.array([10], dtype=np.double)
-    self.prob = blitzml.LassoProblem(A, b)
+    with captured_output() as out:
+      self.prob = blitzml.LassoProblem(A, b)
 
   def test_lasso_1_by_1(self):
     sol = self.prob.solve(5., include_bias_term=False)
@@ -56,7 +57,8 @@ class TestLassoEmpty(unittest.TestCase):
   def test_lasso_empty(self): 
     A = sp.csc_matrix((100, 1000))
     b = np.ones(100)
-    prob = blitzml.LassoProblem(A, b)
+    with captured_output() as out:
+      prob = blitzml.LassoProblem(A, b)
     self.assertEqual(prob.compute_max_l1_penalty(), 0.)
     sol = prob.solve(0.)
     self.assertEqual(np.linalg.norm(sol.weights), 0.)

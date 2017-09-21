@@ -9,6 +9,7 @@ class TestCopyWarnings(unittest.TestCase):
   def setUp(self):
     self.A = np.ones((1000, 10001), dtype=np.float)
     self.b = np.ones(1000)
+    self.b[0] = -1.0
 
   def test_lasso_dense_copy_warning_C_contiguous(self):
     self.A = np.ascontiguousarray(self.A)

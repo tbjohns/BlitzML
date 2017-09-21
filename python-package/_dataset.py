@@ -69,8 +69,6 @@ class Dataset(object):
       self.dataset_c_wrapper = self.load_sparse_dataset()
     else:
       self.dataset_c_wrapper = self.load_dense_dataset()
-    self.min_b = np.min(b)
-    self.max_b = np.max(b)
 
 
   @property

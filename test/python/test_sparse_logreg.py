@@ -52,6 +52,14 @@ class TestSparseLogRegInitialConditions(unittest.TestCase):
 
 
 class TestSparseLogRegBadLabels(unittest.TestCase):
+  def test_sparse_logreg_non_pm1_labels(self):
+    b = np.array([-1., 0., 1.])
+    A = np.zeros((3, 3))
+    with captured_output() as out:
+      prob = blitzml.SparseLogisticRegressionProblem(A, b)
+    message = out[0]
+    self.assertIn("Warning", message)
+
   def test_sparse_logreg_bad_label_too_large(self):
     b = np.array([-1., 0., 2.])
     A = np.zeros((3, 3))
