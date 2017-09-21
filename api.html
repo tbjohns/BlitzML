@@ -166,7 +166,9 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="blitzml-api-reference">
+  <div class="note4github docutils container">
+Read the rendered documentation at <a class="reference external" href="https://tbjohns.github.io/BlitzML/">https://tbjohns.github.io/BlitzML/</a>.</div>
+<div class="section" id="blitzml-api-reference">
 <h1>BlitzML API reference<a class="headerlink" href="#blitzml-api-reference" title="Permalink to this headline">¶</a></h1>
 <p>This is the complete API reference for the BlitzML python package.</p>
 <div class="section" id="training-l1-regularized-models">
@@ -287,8 +289,9 @@ is None.</li>
 The optimization objective is</p>
 <div class="math">
 <p><img src="_images/math/effa4e1446f9ed5b716e3eb9892c5468b5ef23bb.svg" alt="\sum_i \log(1 + \exp(-b_i a_i^T w)) + \lambda ||w||_1 ,"/></p>
-</div><p>where i indexes the ith row in A and ith entry in b.  Each label should have
-value 1, -1, or somewhere in between.</p>
+</div><p>where i indexes the ith row in A and ith entry in b.  Each label b_i should
+have value 1 or -1.  BlitzML treats other label values as 1 if the value
+exceeds zero and -1 otherwise.</p>
 <p>Calls to <code class="docutils literal"><span class="pre">solve</span></code> and <code class="docutils literal"><span class="pre">compute_max_l1_penalty</span></code> use interfaces identical to
 the same methods in <code class="docutils literal"><span class="pre">blitzml.LassoProblem</span></code>.</p>
 </dd></dl>

@@ -172,30 +172,28 @@
 
 <span class="k">class</span> <span class="nc">SparseLinearProblem</span><span class="p">(</span><span class="n">Problem</span><span class="p">):</span>
   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_check_data_inputs</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_dataset</span> <span class="o">=</span> <span class="n">Dataset</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span> 
-    <span class="bp">self</span><span class="o">.</span><span class="n">_check_data_inputs</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_set_solver_c</span><span class="p">()</span>
 
   <span class="k">def</span> <span class="nf">_set_solver_c</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_solver_c_wrap</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_new_sparse_linear_solver_wrapper</span><span class="p">()</span>
 
-  <span class="k">def</span> <span class="nf">_check_data_inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="n">A</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dataset</span><span class="o">.</span><span class="n">A</span>
-    <span class="n">b</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dataset</span><span class="o">.</span><span class="n">b</span>
+  <span class="k">def</span> <span class="nf">_check_data_inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">sp</span><span class="o">.</span><span class="n">isspmatrix</span><span class="p">(</span><span class="n">A</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">A</span><span class="p">)</span> <span class="o">!=</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-      <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Design matrix of type </span><span class="si">{}</span><span class="s2"> not allowed. Type must be &quot;</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Design matrix of type </span><span class="si">{}</span><span class="s2"> is invalid. Type must be &quot;</span>
              <span class="s2">&quot;numpy.ndarray or scipy sparse matrix.&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">A</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
       <span class="n">value_error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">b</span><span class="p">)</span> <span class="o">!=</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-      <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Labels vector of type </span><span class="si">{}</span><span class="s2"> not allowed. Type must be &quot;</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Labels vector of type </span><span class="si">{}</span><span class="s2"> is invalid. Type must be &quot;</span>
              <span class="s2">&quot;numpy.ndarray.&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">b</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
       <span class="n">value_error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">A</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
-      <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Design matrix with shape </span><span class="si">{}</span><span class="s2"> not allowed. &quot;</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Design matrix with shape </span><span class="si">{}</span><span class="s2"> is invalid. &quot;</span>
              <span class="s2">&quot;Matrix must be 2d.&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
       <span class="n">value_error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">b</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
-      <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Labels vector with shape </span><span class="si">{}</span><span class="s2"> not allowed. &quot;</span> 
+      <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Labels vector with shape </span><span class="si">{}</span><span class="s2"> is invalid. &quot;</span> 
              <span class="s2">&quot;Labels must be 1d.&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
       <span class="n">value_error</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">A</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">b</span><span class="p">):</span>
@@ -381,9 +379,9 @@
   <span class="k">def</span> <span class="nf">_loss_index</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">return</span> <span class="mf">0.</span>
 
-  <span class="k">def</span> <span class="nf">_check_data_inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="n">SparseLinearProblem</span><span class="o">.</span><span class="n">_check_data_inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-    <span class="n">check_regression_labels</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dataset</span><span class="p">)</span>
+  <span class="k">def</span> <span class="nf">_check_data_inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+    <span class="n">SparseLinearProblem</span><span class="o">.</span><span class="n">_check_data_inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+    <span class="n">check_regression_labels</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
 
   <span class="k">def</span> <span class="nf">_set_solver_c</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_solver_c_wrap</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_new_lasso_solver_wrapper</span><span class="p">()</span></div>
@@ -418,9 +416,9 @@
   <span class="k">def</span> <span class="nf">_loss_index</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">return</span> <span class="mf">1.</span>
 
-  <span class="k">def</span> <span class="nf">_check_data_inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="n">SparseLinearProblem</span><span class="o">.</span><span class="n">_check_data_inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-    <span class="n">check_regression_labels</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dataset</span><span class="p">)</span></div>
+  <span class="k">def</span> <span class="nf">_check_data_inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+    <span class="n">SparseLinearProblem</span><span class="o">.</span><span class="n">_check_data_inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+    <span class="n">check_regression_labels</span><span class="p">(</span><span class="n">b</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="SparseLogisticRegressionProblem"><a class="viewcode-back" href="../../api.html#blitzml.SparseLogisticRegressionProblem">[docs]</a><span class="k">class</span> <span class="nc">SparseLogisticRegressionProblem</span><span class="p">(</span><span class="n">SparseLinearProblem</span><span class="p">):</span>
@@ -431,8 +429,9 @@
 
 <span class="sd">    \sum_i \log(1 + \exp(-b_i a_i^T w)) + \lambda ||w||_1 ,</span>
 
-<span class="sd">  where i indexes the ith row in A and ith entry in b.  Each label should have</span>
-<span class="sd">  value 1, -1, or somewhere in between.</span>
+<span class="sd">  where i indexes the ith row in A and ith entry in b.  Each label b_i should </span>
+<span class="sd">  have value 1 or -1.  BlitzML treats other label values as 1 if the value </span>
+<span class="sd">  exceeds zero and -1 otherwise.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">_solution_class</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -442,9 +441,9 @@
   <span class="k">def</span> <span class="nf">_loss_index</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">return</span> <span class="mf">2.</span>
 
-  <span class="k">def</span> <span class="nf">_check_data_inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="n">SparseLinearProblem</span><span class="o">.</span><span class="n">_check_data_inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-    <span class="n">check_classification_labels</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dataset</span><span class="p">)</span>
+  <span class="k">def</span> <span class="nf">_check_data_inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+    <span class="n">SparseLinearProblem</span><span class="o">.</span><span class="n">_check_data_inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+    <span class="n">check_logreg_labels</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
 
   <span class="k">def</span> <span class="nf">_set_solver_c</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_solver_c_wrap</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">BlitzML_new_sparse_logreg_solver_wrapper</span><span class="p">()</span></div>
@@ -469,9 +468,9 @@
   <span class="k">def</span> <span class="nf">_loss_index</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">return</span> <span class="mf">3.</span>
 
-  <span class="k">def</span> <span class="nf">_check_data_inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="n">SparseLinearProblem</span><span class="o">.</span><span class="n">_check_data_inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-    <span class="n">check_classification_labels</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dataset</span><span class="p">)</span></div>
+  <span class="k">def</span> <span class="nf">_check_data_inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+    <span class="n">SparseLinearProblem</span><span class="o">.</span><span class="n">_check_data_inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+    <span class="n">check_classification_labels</span><span class="p">(</span><span class="n">b</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="SparseSmoothedHingeProblem"><a class="viewcode-back" href="../../api.html#blitzml.SparseSmoothedHingeProblem">[docs]</a><span class="k">class</span> <span class="nc">SparseSmoothedHingeProblem</span><span class="p">(</span><span class="n">SparseLinearProblem</span><span class="p">):</span>
@@ -503,9 +502,9 @@
   <span class="k">def</span> <span class="nf">_loss_index</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">return</span> <span class="mf">4.</span>
 
-  <span class="k">def</span> <span class="nf">_check_data_inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="n">SparseLinearProblem</span><span class="o">.</span><span class="n">_check_data_inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-    <span class="n">check_classification_labels</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dataset</span><span class="p">)</span></div>
+  <span class="k">def</span> <span class="nf">_check_data_inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+    <span class="n">SparseLinearProblem</span><span class="o">.</span><span class="n">_check_data_inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+    <span class="n">check_classification_labels</span><span class="p">(</span><span class="n">b</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="LassoSolution"><a class="viewcode-back" href="../../api.html#blitzml.LassoSolution">[docs]</a><span class="k">class</span> <span class="nc">LassoSolution</span><span class="p">(</span><span class="n">RegressionSolution</span><span class="p">):</span>

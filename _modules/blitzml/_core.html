@@ -627,9 +627,9 @@
     <span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Starting optimization with non-empty log directory&quot;</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">check_classification_labels</span><span class="p">(</span><span class="n">dataset</span><span class="p">):</span>
-  <span class="n">min_b</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">min_b</span>
-  <span class="n">max_b</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">max_b</span>
+<span class="k">def</span> <span class="nf">check_classification_labels</span><span class="p">(</span><span class="n">b</span><span class="p">):</span>
+  <span class="n">min_b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+  <span class="n">max_b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
   <span class="k">if</span> <span class="n">min_b</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">:</span>
     <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Labels vector conatins values less than -1.0, which is &quot;</span>
            <span class="s2">&quot;unusual. Typically labels are +/-1 for classification.&quot;</span><span class="p">)</span>
@@ -651,11 +651,37 @@
            <span class="s2">&quot;unusual. Use 1 to label positive training instances.&quot;</span><span class="p">)</span>
     <span class="n">warn</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
-<span class="k">def</span> <span class="nf">check_regression_labels</span><span class="p">(</span><span class="n">dataset</span><span class="p">):</span>
-  <span class="n">min_b</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">min_b</span>
-  <span class="n">max_b</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">max_b</span>
-  <span class="k">if</span> <span class="n">min_b</span> <span class="o">==</span> <span class="mf">0.0</span> <span class="ow">and</span> <span class="n">max_b</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">:</span>
-    <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Labels vector contains only zero values.&quot;</span>
+<span class="k">def</span> <span class="nf">check_regression_labels</span><span class="p">(</span><span class="n">b</span><span class="p">):</span>
+  <span class="n">min_b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+  <span class="n">max_b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">min_b</span> <span class="o">==</span> <span class="n">max_b</span><span class="p">:</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Labels vector contains only one unique value (</span><span class="si">{}</span><span class="s2">).&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">min_b</span><span class="p">)</span>
+    <span class="n">warn</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">check_logreg_labels</span><span class="p">(</span><span class="n">b</span><span class="p">):</span>
+  <span class="n">min_b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+  <span class="n">max_b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+
+  <span class="n">invalid_labels</span> <span class="o">=</span> <span class="kc">False</span>
+  <span class="k">if</span> <span class="n">min_b</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mf">1.0</span> <span class="ow">or</span> <span class="n">max_b</span> <span class="o">&gt;</span> <span class="mf">1.0</span><span class="p">:</span>
+    <span class="n">invalid_labels</span> <span class="o">=</span> <span class="kc">True</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">unique_b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">unique_b</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span> <span class="ow">or</span> <span class="nb">set</span><span class="p">(</span><span class="n">unique_b</span><span class="p">)</span><span class="o">.</span><span class="n">difference</span><span class="p">({</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">}):</span>
+      <span class="n">invalid_labels</span> <span class="o">=</span> <span class="kc">True</span>
+
+  <span class="k">if</span> <span class="n">invalid_labels</span><span class="p">:</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Labels vector contains values other than -1 and 1. Labels will be &quot;</span>
+           <span class="s2">&quot;treated as 1 if greater than zero and -1 otherwise.&quot;</span><span class="p">)</span>
+    <span class="n">warn</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+  <span class="k">if</span> <span class="n">min_b</span> <span class="o">&gt;</span> <span class="mf">0.</span><span class="p">:</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Labels vector contains no negative labels. Label negative training &quot;</span>
+           <span class="s2">&quot;instances with -1.&quot;</span><span class="p">)</span>
+    <span class="n">warn</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+  <span class="k">elif</span> <span class="n">max_b</span> <span class="o">&lt;=</span> <span class="mf">0.</span><span class="p">:</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Labels vector contains no positive labels. Label positive training &quot;</span>
+           <span class="s2">&quot;instances with 1.&quot;</span><span class="p">)</span>
     <span class="n">warn</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
 </pre></div>
