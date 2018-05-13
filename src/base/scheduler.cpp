@@ -27,7 +27,7 @@ value_t Scheduler::estimate_C_progress() {
   value_t ret = 1.;
   if (C_progress_estimates.size() > 0) {
     ret = median_last_k(C_progress_estimates, 2);
-  } 
+  }
   if (ret == ret && ret >= 1.) {
     return ret;
   } else {
@@ -42,16 +42,16 @@ void Scheduler::set_problem_sizes(const std::vector<value_t> &problem_sizes) {
 }
 
 
-void Scheduler::optimize_xi_and_epsilon(unsigned short &best_capsule_ind, 
+void Scheduler::optimize_xi_and_epsilon(unsigned short &best_capsule_ind,
                                          value_t &best_epsilon,
                                          double &best_time_limit) {
 
-  assert(gamma > 0, "in scheduler, must set gamma to be > 0");
-  assert(xi_candidates.size() > 0, 
-         "in scheduler, must have at least 1 xi candidate");
-  assert(epsilon_candidates.size() > 0, 
-         "in scheduler, must have at least 1 epsilon candidate");
-  
+  // assert(gamma > 0, "in scheduler, must set gamma to be > 0");
+  // assert(xi_candidates.size() > 0,
+  //        "in scheduler, must have at least 1 xi candidate");
+  // assert(epsilon_candidates.size() > 0,
+  //        "in scheduler, must have at least 1 epsilon candidate");
+
   value_t C_progress = estimate_C_progress();
 
   double T_overhead = overhead_time_estimate();
@@ -98,7 +98,7 @@ void Scheduler::optimize_xi_and_epsilon(unsigned short &best_capsule_ind,
 }
 
 
-void Scheduler::record_subproblem_size(value_t xi, 
+void Scheduler::record_subproblem_size(value_t xi,
                                        value_t subproblem_size) {
   chosen_xi = xi;
   chosen_subproblem_size = subproblem_size;
@@ -133,7 +133,7 @@ void Scheduler::record_subproblem_progress(value_t new_Delta,
     //C_progress_est = 1.5 / chosen_xi;
   //} else {
     C_progress_est = (1 - new_Delta / current_Delta) / (1 - realized_epsilon) / chosen_xi;
-  //} 
+  //}
 
   /*
   if (C_progress_est != C_progress_est || C_progress_est < 1) {
@@ -151,8 +151,8 @@ value_t Scheduler::subproblem_time_complexity(value_t epsilon) {
 
 
 double Scheduler::overhead_time_estimate() {
-  assert(C_overhead_time_estimates.size() > 0, 
-         "cannot estimate overhead time before calling record_overhead_time");
+  // assert(C_overhead_time_estimates.size() > 0,
+  //        "cannot estimate overhead time before calling record_overhead_time");
   return median_last_k(C_overhead_time_estimates, 5);
 }
 

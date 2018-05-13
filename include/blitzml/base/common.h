@@ -17,16 +17,18 @@ namespace BlitzML {
 #define LIBRARY_API extern "C"
 #endif
 
-typedef double value_t; 
-typedef std::size_t size_t;
-typedef int index_t;
+typedef double value_t;
+//typedef std::size_t size_t;
+typedef uint32_t size_t;
+typedef uint32_t index_t;
+//typedef int index_t;
 typedef std::vector<index_t>::iterator index_itr;
 typedef std::vector<value_t>::iterator value_itr;
 typedef std::vector<index_t>::const_iterator const_index_itr;
 typedef std::vector<value_t>::const_iterator const_value_itr;
 
 
-void assert(bool okay, std::string error_message);
+//void assert(bool okay, std::string error_message);
 void warn_if(bool condition, std::string message);
 void print(const char* fmt, ...);
 void debug(const char* fmt, ...);
@@ -34,7 +36,7 @@ void debug(const char* fmt, ...);
 
 class ObjectiveValues {
   public:
-    ObjectiveValues() 
+    ObjectiveValues()
       : dual_obj_(std::numeric_limits<value_t>::min()),
         primal_obj_x_(std::numeric_limits<value_t>::max()),
         primal_obj_y_(std::numeric_limits<value_t>::max()),
@@ -82,9 +84,9 @@ class Parameters {
 
     virtual ~Parameters() { debug("delete params"); }
 
-  private: 
+  private:
     const value_t *values;
-    size_t count; 
+    size_t count;
 
     Parameters();
 };
