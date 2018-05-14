@@ -7,10 +7,8 @@
 #include <blitzml/sparse_linear/logreg_solver.h>
 #include <blitzml/dataset/sparse_dataset.h>
 
-using namespace BlitzML;
-
 // [[Rcpp::export]]
-SEXP BlitzML_new_solver() {
+SEXP BlitzML_new_sparse_logreg_solver() {
   BlitzML::SparseLogRegSolver* solver = new BlitzML::SparseLogRegSolver();
   Rcpp::XPtr<BlitzML::SparseLogRegSolver> ptr(solver, true);
   return ptr;
@@ -32,4 +30,43 @@ double BlitzML_sparse_linear_solver_compute_max_l1_penalty(
   Rcpp::XPtr< BlitzML::SparseDataset<double> > data(xptr_dataset);
   Rcpp::XPtr< BlitzML::Parameters > params(xptr_params);
   return solver->compute_max_l1_penalty(data, params);
+}
+
+// [[Rcpp::export]]
+void BlitzML_solve_problem(SEXP xptr_solver,
+                           SEXP xptr_dataset,
+                           SEXP xptr_params,
+                           Rcpp::NumericVector &result,
+                           Rcpp::String &status_buffer,
+                           const Rcpp::String &log_dir) {
+  Rcpp::XPtr< BlitzML::SparseLogRegSolver > solver(xptr_solver);
+  Rcpp::XPtr< BlitzML::SparseDataset<double> > data(xptr_dataset);
+  Rcpp::XPtr< BlitzML::Parameters > params(xptr_params);
+  double *result_ptr = (double *)result.begin();
+  char *buf = (char *)status_buffer.get_cstring();
+  // status =
+  solver->solve(data, params, result_ptr, buf, log_dir.get_cstring());
+}
+
+// [[Rcpp::export]]
+void BlitzML_set_tolerance(SEXP xptr_solver, double value) {
+  Rcpp::XPtr< BlitzML::SparseLogRegSolver > solver(xptr_solver);
+  solver->set_tolerance(value);
+}
+// [[Rcpp::export]]
+void BlitzML_set_max_time(SEXP xptr_solver, double value) {
+  Rcpp::XPtr< BlitzML::SparseLogRegSolver > solver(xptr_solver);
+  solver->set_max_time(value);
+}
+
+// [[Rcpp::export]]
+void BlitzML_set_max_iterations(SEXP xptr_solver, unsigned value) {
+  Rcpp::XPtr< BlitzML::SparseLogRegSolver > solver(xptr_solver);
+  solver->set_max_iterations(value);
+}
+
+// [[Rcpp::export]]
+void BlitzML_set_use_working_sets(SEXP xptr_solver, unsigned value) {
+  Rcpp::XPtr< BlitzML::SparseLogRegSolver > solver(xptr_solver);
+  solver->set_use_working_sets(value);
 }

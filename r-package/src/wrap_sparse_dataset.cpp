@@ -4,7 +4,7 @@
 
 
 // [[Rcpp::export]]
-SEXP create_solver_sparse_dataset(const Rcpp::S4 &x,
+SEXP BlitzML_new_sparse_dataset(const Rcpp::S4 &x,
                                        const Rcpp::NumericVector &y) {
   dMappedCSC x_csc = extract_mapped_csc(x);
   double *y_ptr = (double *)y.begin();
