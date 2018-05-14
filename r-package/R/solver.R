@@ -5,61 +5,162 @@
 
 #' @useDynLib "blitzml", .registration=TRUE
 #' @importFrom Rcpp sourceCpp
-#' @export
-get_max_lambda = function(x, y, params = c(l1_penalty = 1, "na" = 0, include_bias_term = 1, loss_index = 2)) {
-  solver = BlitzML_new_sparse_logreg_solver()
-  dataset = BlitzML_new_sparse_dataset(x, y)
-  params = BlitzML_new_parameters(params)
-  BlitzML_sparse_linear_solver_compute_max_l1_penalty(solver, dataset, params)
-}
+#' @import Matrix
+#' @importFrom futile.logger flog.info flog.debug flog.trace
 
 #' @export
-BlitzMLRegression = R6::R6Class(
+LassoLogisticRegressionBlitzML = R6::R6Class(
   "BlitzMLRegression",
   public = list(
-    initialize = function(lambda,
+    initialize = function(loss = c("squared", "huber", "logistic"),
+                          lambda = "auto",
+                          n_lambda = 20,
+                          lambda_min_fraction = 0.0001,
+                          lambda_max_fraction = 0.2,
                           include_bias_term = TRUE,
-                          loss = c("squared", "huber", "logistic"),
-                          log_dir = "/dev/null") {
-      loss = match.arg(loss)
-      loss_index = match(loss, private$supported_losses) - 1L
+                          log_dir = tempdir()) {
+      if(loss != "logistic")
+        stop("only 'logistic' loss supported at the moment")
+
+      stopifnot(is.numeric(lambda) || identical(lambda, "auto"))
+      if(is.numeric(lambda))
+        lambda = sort(lambda)
+
+      private$n_lambda = n_lambda[[1]]
+      private$lambda_min_fraction = lambda_min_fraction[[1]]
+      private$lambda_max_fraction = lambda_max_fraction[[1]]
+
+      private$loss = match.arg(loss)
+      loss_index = match(private$loss, private$supported_losses) - 1L
       private$log_dir = log_dir
-      switch (loss,
-              logistic = {private$solver = BlitzML_new_sparse_logreg_solver()},
-              stop(sprintf("solver for '%s' loss function is not supported yet", loss))
-      )
-      private$params = BlitzML_new_parameters(c(lambda = lambda,
-                         undefined_param = 0,
-                         include_bias_term = as.numeric(include_bias_term),
-                         loss_index = loss_index))
+      private$params = list(lambda = lambda,
+                            undefined_param = 0,
+                            include_bias_term = as.numeric(include_bias_term),
+                            loss_index = loss_index)
     },
-    fit = function(x, y, init = NULL, ...) {
-      stopifnot(is.vector(y))
+    fit = function(x, y, ...) {
+      stopifnot(is.numeric(y))
       stopifnot(inherits(x, "dgCMatrix"))
       stopifnot(nrow(x) == length(y))
 
+      solver = switch (private$loss,
+              logistic = BlitzML_new_sparse_logreg_solver(),
+              stop(sprintf("solver for '%s' loss function is not supported yet", private$loss))
+      )
       num_features = ncol(x)
-      num_examples = length(y)
-
+      num_examples = nrow(x)
+      # FIXME
+      # https://github.com/tbjohns/BlitzML/blob/93f80a83e206001817a0b1a0b81db6455ef44a87/python-package/_sparse_linear.py#L141
       result_buffer = numeric(num_features + 1 + num_examples + 2)
-      if (!is.null(init))
-        result_buffer[1:num_features] = init
-
-      status_buffer = paste(rep(" ", 64), collapse = "")
+      status_buffer = raw(64)
 
       dataset = BlitzML_new_sparse_dataset(x, y)
 
-      BlitzML_solve_problem(private$solver, dataset, private$params, result_buffer, status_buffer, private$log_dir)
-      return(list(coef = result_buffer[1:num_features],
-                  bias = result_buffer[[num_features + 1L]],
-                  result = result_buffer,
-                  status = status_buffer))
-    }
+      # str(self$lambda_seq)
+      if(is.null(self$lambda_seq)) {
+        if(identical(private$params$lambda, "auto")) {
+          self$lambda_seq = private$generate_lambda_seq(x, y)
+        } else {
+          self$lambda_seq = private$params$lambda
+        }
+      }
+
+      res = lapply(self$lambda_seq, function(lambda) {
+        start = Sys.time()
+        params = c(lambda = lambda,
+                   undefined_param = private$params$undefined_param,
+                   include_bias_term = private$params$include_bias_term,
+                   loss_index = private$params$loss_index)
+        params = BlitzML_new_parameters(params)
+        BlitzML_solve_problem(solver, dataset, params, result_buffer, status_buffer, private$log_dir)
+
+        coefs = result_buffer[1L:num_features]
+        bias = result_buffer[[num_features + 1L]]
+
+        time_spent =  difftime(Sys.time(), start, "sec")
+        futile.logger::flog.trace("solved in %f sec for lambda %f, %d non-zero coef (status: '%s')",
+                                  time_spent, lambda, sum(coefs != 0), rawToChar(status_buffer))
+        # put bias followed coefficients
+        as(c(bias, coefs), "CsparseMatrix")
+      })
+      res = do.call(cbind, res)
+      colnames(res) = paste("lambda=", self$lambda_seq, sep = "")
+      cn = colnames(x)
+      if(is.null(cn))
+        cn = paste("V", seq_len(ncol(x)), sep = "")
+      rownames(res) = c("bias", cn)
+      self$coef = res
+      invisible(self$coef)
+    },
+    predict = function(x, ...) {
+      x = cbind(rep(1, nrow(x)), x)
+      sigmoid(x %*% self$coef)
+    },
+    cross_validate = function(x, y,
+                              fold_id = NULL,
+                              n_folds = 4,
+                              callbacks = list(auc = blitzml::auc),
+                              cores = parallel::detectCores(),
+                              ...) {
+
+      if(is.null(self$lambda_seq) && identical(private$params$lambda, "auto")) {
+        self$lambda_seq = private$generate_lambda_seq(x, y)
+      }
+
+      if (.Platform$OS.type != "unix" && cores > 1) {
+        warning("Windows detected - setting mc.cores = 1")
+        cores = 1L
+      }
+
+      lapply(callbacks, function(f) stopifnot(is.function(f) && length(formals(f)) == 2L))
+
+      if(is.null(fold_id))
+        fold_id = sample.int(n_folds, nrow(x), replace = TRUE)
+      folds = unique(fold_id)
+
+      res = parallel::mclapply(folds, function(fld) {
+        i = fold_id == fld
+
+        x_train = x[i, , drop = FALSE]
+        y_train = y[i]
+
+        x_test = x[-i, , drop = FALSE]
+        y_test = y[-i]
+
+        coef = self$fit(x_train, y_train)
+        preds = self$predict(x_test)
+        flog.trace("executing callbacks")
+        scores = lapply(callbacks, function(f) {
+          vapply(1:ncol(preds), function(col) {
+            f(y_test, preds[, col])
+          }, 0.0)
+        })
+        ret = data.frame(fold = fld, scores, list(lambda = self$lambda_seq))
+        attr(ret, "coef") = coef
+        ret
+      }, mc.cores = cores, ...)
+      ret = do.call(rbind, res)
+      attr(ret, "coef") = lapply(res, function(x) attr(x, "coef"))
+      ret
+    },
+    coef = NULL,
+    lambda_seq = NULL
   ),
   private = list(
+    generate_lambda_seq = function(x, y) {
+      lambda_max = find_max_lambda(x, y, params = c(0, 0, private$params$include_bias_term, private$params$loss_index))
+      flog.info("found max lambda: %f", lambda_max)
+      10**seq(log10(private$lambda_max_fraction * lambda_max),
+              log10(private$lambda_min_fraction * lambda_max),
+              length.out = private$n_lambda)
+    },
+
     supported_losses = c("squared", "huber", "logistic"),
     params = NULL,
-    solver = NULL,
-    log_dir = NULL
+    loss = NULL,
+    log_dir = NULL,
+    lambda_min_fraction = NULL,
+    lambda_max_fraction = NULL,
+    n_lambda = NULL
   )
 )

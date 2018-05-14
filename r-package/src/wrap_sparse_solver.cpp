@@ -37,13 +37,13 @@ void BlitzML_solve_problem(SEXP xptr_solver,
                            SEXP xptr_dataset,
                            SEXP xptr_params,
                            Rcpp::NumericVector &result,
-                           Rcpp::String &status_buffer,
+                           Rcpp::RawVector &status_buffer,
                            const Rcpp::String &log_dir) {
   Rcpp::XPtr< BlitzML::SparseLogRegSolver > solver(xptr_solver);
   Rcpp::XPtr< BlitzML::SparseDataset<double> > data(xptr_dataset);
   Rcpp::XPtr< BlitzML::Parameters > params(xptr_params);
   double *result_ptr = (double *)result.begin();
-  char *buf = (char *)status_buffer.get_cstring();
+  char *buf = (char *)status_buffer.begin();
   // status =
   solver->solve(data, params, result_ptr, buf, log_dir.get_cstring());
 }

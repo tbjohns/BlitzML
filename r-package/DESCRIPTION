@@ -6,14 +6,18 @@ Authors@R: c(
     person("Tyler", "Johnson", role = c("aut"), comment = "backend C++ solver"),
     person("Dmitriy", "Selivanov", role = c("aut", "cre"), email = "selivanov.dmitriy@gmail.com", comment = "R package")
     )
-Maintainer: Dmitriy Selivanov <selivanov.dmitriy@gmail.com>
 Description: Efficient Solver for Linear Models with Various 
     Loss Functions and L1 penalty
 License: GPL (>= 2)
 Encoding: UTF-8
 LazyData: true
+Depends:
+    R (>= 3.1.0),
+    methods
 Imports: 
+    Matrix,
     R6, 
-    Rcpp (>= 0.12.0)
+    Rcpp (>= 0.12.0), 
+    futile.logger
 LinkingTo: Rcpp
 RoxygenNote: 6.0.1

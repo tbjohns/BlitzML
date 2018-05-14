@@ -52,7 +52,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // BlitzML_solve_problem
-void BlitzML_solve_problem(SEXP xptr_solver, SEXP xptr_dataset, SEXP xptr_params, Rcpp::NumericVector& result, Rcpp::String& status_buffer, const Rcpp::String& log_dir);
+void BlitzML_solve_problem(SEXP xptr_solver, SEXP xptr_dataset, SEXP xptr_params, Rcpp::NumericVector& result, Rcpp::RawVector& status_buffer, const Rcpp::String& log_dir);
 RcppExport SEXP _blitzml_BlitzML_solve_problem(SEXP xptr_solverSEXP, SEXP xptr_datasetSEXP, SEXP xptr_paramsSEXP, SEXP resultSEXP, SEXP status_bufferSEXP, SEXP log_dirSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -60,7 +60,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< SEXP >::type xptr_dataset(xptr_datasetSEXP);
     Rcpp::traits::input_parameter< SEXP >::type xptr_params(xptr_paramsSEXP);
     Rcpp::traits::input_parameter< Rcpp::NumericVector& >::type result(resultSEXP);
-    Rcpp::traits::input_parameter< Rcpp::String& >::type status_buffer(status_bufferSEXP);
+    Rcpp::traits::input_parameter< Rcpp::RawVector& >::type status_buffer(status_bufferSEXP);
     Rcpp::traits::input_parameter< const Rcpp::String& >::type log_dir(log_dirSEXP);
     BlitzML_solve_problem(xptr_solver, xptr_dataset, xptr_params, result, status_buffer, log_dir);
     return R_NilValue;
