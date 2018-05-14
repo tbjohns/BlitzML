@@ -46,11 +46,11 @@ void Scheduler::optimize_xi_and_epsilon(unsigned short &best_capsule_ind,
                                          value_t &best_epsilon,
                                          double &best_time_limit) {
 
-  // assert(gamma > 0, "in scheduler, must set gamma to be > 0");
-  // assert(xi_candidates.size() > 0,
-  //        "in scheduler, must have at least 1 xi candidate");
-  // assert(epsilon_candidates.size() > 0,
-  //        "in scheduler, must have at least 1 epsilon candidate");
+  assert_with_error_message(gamma > 0, "in scheduler, must set gamma to be > 0");
+  assert_with_error_message(xi_candidates.size() > 0,
+         "in scheduler, must have at least 1 xi candidate");
+  assert_with_error_message(epsilon_candidates.size() > 0,
+         "in scheduler, must have at least 1 epsilon candidate");
 
   value_t C_progress = estimate_C_progress();
 
@@ -151,8 +151,8 @@ value_t Scheduler::subproblem_time_complexity(value_t epsilon) {
 
 
 double Scheduler::overhead_time_estimate() {
-  // assert(C_overhead_time_estimates.size() > 0,
-  //        "cannot estimate overhead time before calling record_overhead_time");
+  assert_with_error_message(C_overhead_time_estimates.size() > 0,
+         "cannot estimate overhead time before calling record_overhead_time");
   return median_last_k(C_overhead_time_estimates, 5);
 }
 

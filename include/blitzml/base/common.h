@@ -28,7 +28,7 @@ typedef std::vector<index_t>::const_iterator const_index_itr;
 typedef std::vector<value_t>::const_iterator const_value_itr;
 
 
-//void assert(bool okay, std::string error_message);
+void assert_with_error_message(bool okay, std::string error_message);
 void warn_if(bool condition, std::string message);
 void print(const char* fmt, ...);
 void debug(const char* fmt, ...);

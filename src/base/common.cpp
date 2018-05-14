@@ -12,10 +12,10 @@ using std::endl;
 
 namespace BlitzML {
 
-void assert(bool okay, string error_message) {
+void assert_with_error_message(bool okay, string error_message) {
   if (!okay) {
-    cerr << "Program exited with error: " 
-         << error_message 
+    cerr << "Program exited with error: "
+         << error_message
          << endl;
     throw error_message;
   }
