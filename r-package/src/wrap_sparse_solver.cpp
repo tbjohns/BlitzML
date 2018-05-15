@@ -44,7 +44,6 @@ void BlitzML_solve_problem(SEXP xptr_solver,
   Rcpp::XPtr< BlitzML::Parameters > params(xptr_params);
   double *result_ptr = (double *)result.begin();
   char *buf = (char *)status_buffer.begin();
-  // status =
   solver->solve(data, params, result_ptr, buf, log_dir.get_cstring());
 }
 
