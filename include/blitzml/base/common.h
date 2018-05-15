@@ -18,10 +18,15 @@ namespace BlitzML {
 #endif
 
 typedef double value_t;
-//typedef std::size_t size_t;
+
+#ifdef BLITZML_32BIT_WORD
 typedef uint32_t size_t;
+#else
+typedef std::size_t size_t;
+#endif
+
 typedef uint32_t index_t;
-//typedef int index_t;
+
 typedef std::vector<index_t>::iterator index_itr;
 typedef std::vector<value_t>::iterator value_itr;
 typedef std::vector<index_t>::const_iterator const_index_itr;
