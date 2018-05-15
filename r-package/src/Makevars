@@ -11,4 +11,4 @@ all: $(SHLIB)
 clean:
 	@rm -f $(OBJECTS)
 
-PKG_CXXFLAGS = -I../../include
+PKG_CXXFLAGS = -I../inst/include
