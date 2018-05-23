@@ -13,7 +13,7 @@ You can use BlitzML as a Python package or C library.  BlitzML uses minimal memo
 
 BlitzML trains sparse models by solving the problem 
 
-<img src="img/l1_obj" width="280" />
+<img src="img/l1_obj.png" width="280" />
 
 Here are the available loss functions:
 
