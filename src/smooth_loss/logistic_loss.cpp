@@ -11,7 +11,7 @@ value_t LogisticLoss::compute_loss(value_t a_dot_omega, value_t label) const {
 
 value_t LogisticLoss::compute_conjugate(value_t dual_variable, 
                                         value_t label) const {
-  if (label == 0.) return 0.;
+  if (label == 0. || dual_variable == 0.) return 0.;
   value_t neg_ratio = -dual_variable / label;
   return neg_ratio * log(neg_ratio) + (1 - neg_ratio) * log(1 - neg_ratio);
 }
