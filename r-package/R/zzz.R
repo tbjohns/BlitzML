@@ -1,5 +1,6 @@
 #' @useDynLib "blitzml", .registration=TRUE
 #' @importFrom Rcpp sourceCpp
+#' @import methods
 #' @import Matrix
 #' @importFrom futile.logger flog.info flog.debug flog.trace
 

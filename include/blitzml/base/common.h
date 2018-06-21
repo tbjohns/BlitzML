@@ -19,7 +19,7 @@ namespace BlitzML {
 
 typedef double value_t;
 
-#ifdef BLITZML_32BIT_WORD
+#ifdef BLITZML_R_WRAPPER
 typedef uint32_t size_t;
 #else
 typedef std::size_t size_t;
@@ -32,12 +32,10 @@ typedef std::vector<value_t>::iterator value_itr;
 typedef std::vector<index_t>::const_iterator const_index_itr;
 typedef std::vector<value_t>::const_iterator const_value_itr;
 
-
 void assert_with_error_message(bool okay, std::string error_message);
 void warn_if(bool condition, std::string message);
 void print(const char* fmt, ...);
 void debug(const char* fmt, ...);
-
 
 class ObjectiveValues {
   public:

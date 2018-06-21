@@ -3,6 +3,7 @@
 export(BlitzMLLassoRegression)
 export(auc)
 import(Matrix)
+import(methods)
 importFrom(Rcpp,sourceCpp)
 importFrom(futile.logger,flog.debug)
 importFrom(futile.logger,flog.info)

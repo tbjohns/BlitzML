@@ -13,4 +13,4 @@ all: $(SHLIB)
 clean:
 	@rm -f $(OBJECTS)
 
-PKG_CXXFLAGS = -I../inst/include -DBLITZML_32BIT_WORD
+PKG_CXXFLAGS = -I../inst/include -DBLITZML_R_WRAPPER -DR_USE_C99_IN_CXX

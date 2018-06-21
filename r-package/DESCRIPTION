@@ -1,13 +1,12 @@
 Package: blitzml
 Type: Package
 Title: Efficient Solver for Linear Models with Various Loss Functions and L1 penalty
-Version: 0.1.0.1
+Version: 0.1.0
 Authors@R: c(
     person("Tyler", "Johnson", role = c("aut"), comment = "backend C++ solver"),
     person("Dmitriy", "Selivanov", role = c("aut", "cre"), email = "selivanov.dmitriy@gmail.com", comment = "R package")
     )
-Description: Efficient Solver for Linear Models with Various 
-    Loss Functions and L1 penalty
+Description: Efficient Solver for Linear Models with L1 penalty.
 License: GPL (>= 2)
 Encoding: UTF-8
 LazyData: true
