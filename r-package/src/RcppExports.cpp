@@ -17,13 +17,45 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// BlitzML_new_sparse_logreg_solver
-SEXP BlitzML_new_sparse_logreg_solver();
-RcppExport SEXP _blitzml_BlitzML_new_sparse_logreg_solver() {
+// BlitzML_new_dense_dataset
+SEXP BlitzML_new_dense_dataset(const Rcpp::NumericMatrix& x, const Rcpp::NumericVector& y);
+RcppExport SEXP _blitzml_BlitzML_new_dense_dataset(SEXP xSEXP, SEXP ySEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    rcpp_result_gen = Rcpp::wrap(BlitzML_new_sparse_logreg_solver());
+    Rcpp::traits::input_parameter< const Rcpp::NumericMatrix& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::NumericVector& >::type y(ySEXP);
+    rcpp_result_gen = Rcpp::wrap(BlitzML_new_dense_dataset(x, y));
+    return rcpp_result_gen;
+END_RCPP
+}
+// BlitzML_new_solver
+SEXP BlitzML_new_solver();
+RcppExport SEXP _blitzml_BlitzML_new_solver() {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    rcpp_result_gen = Rcpp::wrap(BlitzML_new_solver());
+    return rcpp_result_gen;
+END_RCPP
+}
+// BlitzML_new_logreg_solver
+SEXP BlitzML_new_logreg_solver();
+RcppExport SEXP _blitzml_BlitzML_new_logreg_solver() {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    rcpp_result_gen = Rcpp::wrap(BlitzML_new_logreg_solver());
+    return rcpp_result_gen;
+END_RCPP
+}
+// BlitzML_new_linear_solver
+SEXP BlitzML_new_linear_solver();
+RcppExport SEXP _blitzml_BlitzML_new_linear_solver() {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    rcpp_result_gen = Rcpp::wrap(BlitzML_new_linear_solver());
     return rcpp_result_gen;
 END_RCPP
 }
@@ -38,16 +70,16 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// BlitzML_sparse_linear_solver_compute_max_l1_penalty
-double BlitzML_sparse_linear_solver_compute_max_l1_penalty(SEXP xptr_solver, SEXP xptr_dataset, SEXP xptr_params);
-RcppExport SEXP _blitzml_BlitzML_sparse_linear_solver_compute_max_l1_penalty(SEXP xptr_solverSEXP, SEXP xptr_datasetSEXP, SEXP xptr_paramsSEXP) {
+// BlitzML_solver_compute_max_l1_penalty
+double BlitzML_solver_compute_max_l1_penalty(SEXP xptr_solver, SEXP xptr_dataset, SEXP xptr_params);
+RcppExport SEXP _blitzml_BlitzML_solver_compute_max_l1_penalty(SEXP xptr_solverSEXP, SEXP xptr_datasetSEXP, SEXP xptr_paramsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< SEXP >::type xptr_solver(xptr_solverSEXP);
     Rcpp::traits::input_parameter< SEXP >::type xptr_dataset(xptr_datasetSEXP);
     Rcpp::traits::input_parameter< SEXP >::type xptr_params(xptr_paramsSEXP);
-    rcpp_result_gen = Rcpp::wrap(BlitzML_sparse_linear_solver_compute_max_l1_penalty(xptr_solver, xptr_dataset, xptr_params));
+    rcpp_result_gen = Rcpp::wrap(BlitzML_solver_compute_max_l1_penalty(xptr_solver, xptr_dataset, xptr_params));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -113,9 +145,12 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_blitzml_BlitzML_new_sparse_dataset", (DL_FUNC) &_blitzml_BlitzML_new_sparse_dataset, 2},
-    {"_blitzml_BlitzML_new_sparse_logreg_solver", (DL_FUNC) &_blitzml_BlitzML_new_sparse_logreg_solver, 0},
+    {"_blitzml_BlitzML_new_dense_dataset", (DL_FUNC) &_blitzml_BlitzML_new_dense_dataset, 2},
+    {"_blitzml_BlitzML_new_solver", (DL_FUNC) &_blitzml_BlitzML_new_solver, 0},
+    {"_blitzml_BlitzML_new_logreg_solver", (DL_FUNC) &_blitzml_BlitzML_new_logreg_solver, 0},
+    {"_blitzml_BlitzML_new_linear_solver", (DL_FUNC) &_blitzml_BlitzML_new_linear_solver, 0},
     {"_blitzml_BlitzML_new_parameters", (DL_FUNC) &_blitzml_BlitzML_new_parameters, 1},
-    {"_blitzml_BlitzML_sparse_linear_solver_compute_max_l1_penalty", (DL_FUNC) &_blitzml_BlitzML_sparse_linear_solver_compute_max_l1_penalty, 3},
+    {"_blitzml_BlitzML_solver_compute_max_l1_penalty", (DL_FUNC) &_blitzml_BlitzML_solver_compute_max_l1_penalty, 3},
     {"_blitzml_BlitzML_solve_problem", (DL_FUNC) &_blitzml_BlitzML_solve_problem, 6},
     {"_blitzml_BlitzML_set_tolerance", (DL_FUNC) &_blitzml_BlitzML_set_tolerance, 2},
     {"_blitzml_BlitzML_set_max_time", (DL_FUNC) &_blitzml_BlitzML_set_max_time, 2},

@@ -1,13 +1,8 @@
-#' @useDynLib "blitzml", .registration=TRUE
-#' @importFrom Rcpp sourceCpp
-#' @import Matrix
-#' @importFrom futile.logger flog.info flog.debug flog.trace
-
 #' @export
-LassoLogisticRegressionBlitzML = R6::R6Class(
-  "LassoLogisticRegressionBlitzML",
+BlitzMLLassoRegression = R6::R6Class(
+  "BlitzMLLassoRegression",
   public = list(
-    initialize = function(loss = c("squared", "huber", "logistic"),
+    initialize = function(loss = c("squared", "logistic"), #c("squared", "huber", "logistic", "squared_hinge", "smoothed_hinge"),
                           lambda = "auto",
                           n_lambda = 20,
                           lambda_min_fraction = 0.0001,
@@ -16,49 +11,58 @@ LassoLogisticRegressionBlitzML = R6::R6Class(
                           tol = 1e-3,
                           max_time = 60,
                           max_iter = 10000,
-                          use_working_sets = TRUE,
                           log_dir = tempdir()) {
-      if(loss != "logistic")
-        stop("only 'logistic' loss supported at the moment")
+
+      loss = match.arg(loss)
+      check_loss(loss)
+
+      stopifnot(
+        is.numeric(lambda_min_fraction) &&
+        is.numeric(lambda_max_fraction) &&
+        is.numeric(n_lambda) &&
+        is.numeric(tol) &&
+        is.numeric(max_time) &&
+        is.numeric(max_iter) &&
+        is.logical(include_bias_term)
+      )
 
       stopifnot(is.numeric(lambda) || identical(lambda, "auto"))
-      if(is.numeric(lambda))
-        lambda = sort(lambda)
+      if(is.numeric(lambda)) lambda = sort(lambda)
 
       private$n_lambda = n_lambda[[1]]
       private$lambda_min_fraction = lambda_min_fraction[[1]]
       private$lambda_max_fraction = lambda_max_fraction[[1]]
       private$tol = tol
       private$max_iter = max_iter
-      private$use_working_sets= use_working_sets
       private$max_time = max_time
-      private$loss = match.arg(loss)
+      private$loss = loss
       private$log_dir = log_dir
 
-      # loss_index:
-      # 0 - squared
-      # 1 - huber
-      # 2 - logistic
       private$params = list(lambda = lambda,
                             undefined_param = 0,
                             include_bias_term = as.numeric(include_bias_term),
-                            loss_index = match(private$loss, private$supported_losses) - 1L)
+                            loss_index = encode_loss(private$loss),
+                            loss = private$loss)
+      futile.logger::flog.debug("params : %s", paste(names(private$params), private$params, sep = "=", collapse = ", "))
     },
     fit = function(x, y, ...) {
       stopifnot(is.numeric(y))
-      stopifnot(inherits(x, "dgCMatrix"))
-      stopifnot(nrow(x) == length(y))
+      if(inherits(x, "sparseMatrix")) {
+        x = as(x, "dgCMatrix")
+      } else {
+        if(! inherits(x, "matrix"))
+          stop("'x' should inherit from 'matrix' or 'Matrix::sparseMatrix'")
+      }
 
-      solver = switch (private$loss,
-              logistic = BlitzML_new_sparse_logreg_solver(),
-              stop(sprintf("solver for '%s' loss function is not supported yet", private$loss))
-      )
+      stopifnot(nrow(x) == length(y))
+      solver = BlitzML_create_solver(private$loss)
+
       # BlitzML requirement - positive classes encoded as 1 and negative as -1
       # FIXME this is for logistic solver only!
-      y = ifelse(y > 0, 1, -1)
+      if(private$loss == "logistic") y = ifelse(y > 0, 1, -1)
 
       BlitzML_set_tolerance(solver, private$tol)
-      BlitzML_set_use_working_sets(solver, private$use_working_sets)
+      BlitzML_set_use_working_sets(solver, TRUE)
       BlitzML_set_max_time(solver, private$max_time)
       BlitzML_set_max_iterations(solver, private$max_iter)
 
@@ -68,7 +72,7 @@ LassoLogisticRegressionBlitzML = R6::R6Class(
       # https://github.com/tbjohns/BlitzML/blob/93f80a83e206001817a0b1a0b81db6455ef44a87/python-package/_sparse_linear.py#L141
       result_buffer = numeric(num_features + 1 + num_examples + 2)
 
-      dataset = BlitzML_new_sparse_dataset(x, y)
+      dataset = BlitzML_create_dataset(x, y)
 
       if(is.null(self$lambda_seq)) {
         if(identical(private$params$lambda, "auto")) {
@@ -79,9 +83,10 @@ LassoLogisticRegressionBlitzML = R6::R6Class(
       }
 
       res = lapply(self$lambda_seq, function(lambda) {
-        status_buffer = raw(64)
+        status_buffer = raw(STATUS_BUFFER_SIZE)
         start = Sys.time()
         params = c(lambda = lambda,
+                   # FIXME https://github.com/tbjohns/BlitzML/blob/93f80a83e206001817a0b1a0b81db6455ef44a87/python-package/_sparse_linear.py#L134
                    undefined_param = private$params$undefined_param,
                    include_bias_term = private$params$include_bias_term,
                    loss_index = private$params$loss_index)
@@ -115,7 +120,9 @@ LassoLogisticRegressionBlitzML = R6::R6Class(
     predict = function(x, ...) {
       # add first dummy column of ones in order to add biases via matrix multiplication
       x = cbind(rep(1, nrow(x)), x)
-      as.matrix(sigmoid(x %*% self$coef))
+      res = x %*% self$coef
+      if(private$loss == "logistic") res = sigmoid(res)
+      as.matrix(res)
     },
     cross_validate = function(x, y,
                               fold_id = NULL,
@@ -161,7 +168,7 @@ LassoLogisticRegressionBlitzML = R6::R6Class(
         ret
       }, mc.cores = cores, ...)
       ret = do.call(rbind, res)
-      class(ret) = c("cv.LassoLogisticRegressionBlitzML", class(ret))
+      class(ret) = c("cv.BlitzMLLassoRegression", class(ret))
       # attr(ret, "coef") = lapply(res, function(x) attr(x, "coef"))
       ret
     },
@@ -170,14 +177,17 @@ LassoLogisticRegressionBlitzML = R6::R6Class(
   ),
   private = list(
     generate_lambda_seq = function(x, y) {
-      lambda_max = find_max_lambda(x, y, params = c(0, 0, private$params$include_bias_term, private$params$loss_index))
+      # lambda_max = find_max_lambda(x, y, params = c(0, 0, private$params$include_bias_term, private$params$loss_index))
+      lambda_max = find_max_lambda(x, y, private$params)
       flog.info("found max lambda: %f", lambda_max)
-      10**seq(log10(private$lambda_min_fraction * lambda_max),
-              log10(private$lambda_max_fraction * lambda_max),
-              length.out = private$n_lambda)
+      lambda_seq = seq(
+        log10(private$lambda_min_fraction * lambda_max),
+        log10(private$lambda_max_fraction * lambda_max),
+        length.out = private$n_lambda
+        )
+      lambda_seq = 10 ** lambda_seq
+      lambda_seq
     },
-
-    supported_losses = c("squared", "huber", "logistic"),
     params = NULL,
     loss = NULL,
     log_dir = NULL,
@@ -186,7 +196,38 @@ LassoLogisticRegressionBlitzML = R6::R6Class(
     n_lambda = NULL,
     tol = NULL,
     max_iter = NULL,
-    max_time = NULL,
-    use_working_sets = NULL
+    max_time = NULL
   )
 )
+
+BlitzML_create_solver = function(loss) {
+  check_loss(loss)
+  switch (loss,
+          squared = BlitzML_new_linear_solver(),
+          huber = BlitzML_new_solver(),
+          logistic = BlitzML_new_logreg_solver(),
+          squared_hinge = BlitzML_new_solver(),
+          smoothed_hinge = BlitzML_new_solver(),
+          stop(sprintf("solver for '%s' loss function is not supported yet", loss))
+  )
+}
+
+check_loss = function(loss) {
+  if(!(loss %in% IMPLEMENTED_LOSS_FUNCTIONS))
+    stop(sprintf("only %s loss supported at the moment", paste(paste("'", IMPLEMENTED_LOSS_FUNCTIONS, "'", sep = ""), collapse = "/")))
+  invisible(TRUE)
+}
+
+encode_loss = function(x) {
+  match(x, AVAILABLE_LOSS_FUNCTIONS) - 1L # loss codes start from 0 in BlitzML
+}
+
+find_max_lambda = function(x, y, params) {
+  solver = BlitzML_create_solver(params$loss)
+  dataset = BlitzML_create_dataset(x, y)
+  # https://github.com/tbjohns/BlitzML/blob/93f80a83e206001817a0b1a0b81db6455ef44a87/python-package/_sparse_linear.py#L42
+  params_vec = c(0, 0, params$include_bias_term, params$loss_index)
+  params_vec = BlitzML_new_parameters(params_vec)
+
+  BlitzML_solver_compute_max_l1_penalty(solver, dataset, params_vec)
+}

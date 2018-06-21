@@ -6,7 +6,7 @@ PKG_LIBS = $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
 # potentially it can make sense to remove 'wildcard'
 SOURCES=$(wildcard base/*.cpp dataset/*.cpp smooth_loss/*.cpp sparse_linear/*.cpp)
 
-OBJECTS = wrap_sparse_solver.o wrap_sparse_dataset.o RcppExports.o $(SOURCES:.cpp=.o)
+OBJECTS = wrap_solver.o wrap_dataset.o RcppExports.o $(SOURCES:.cpp=.o)
 
 all: $(SHLIB)
 

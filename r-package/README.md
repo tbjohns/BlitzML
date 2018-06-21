@@ -23,7 +23,7 @@ dtm = create_dtm(it, hash_vectorizer(2**14))
 
 system.time({
   set.seed(1)
-  model = LassoLogisticRegressionBlitzML$new(loss = "logistic", 
+  model = BlitzMLLassoRegression$new(loss = "logistic", 
                                              lambda = "auto", 
                                              tol = 1e-2,
                                              use_working_sets = TRUE)

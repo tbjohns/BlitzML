@@ -5,16 +5,28 @@ BlitzML_new_sparse_dataset <- function(x, y) {
     .Call(`_blitzml_BlitzML_new_sparse_dataset`, x, y)
 }
 
-BlitzML_new_sparse_logreg_solver <- function() {
-    .Call(`_blitzml_BlitzML_new_sparse_logreg_solver`)
+BlitzML_new_dense_dataset <- function(x, y) {
+    .Call(`_blitzml_BlitzML_new_dense_dataset`, x, y)
+}
+
+BlitzML_new_solver <- function() {
+    .Call(`_blitzml_BlitzML_new_solver`)
+}
+
+BlitzML_new_logreg_solver <- function() {
+    .Call(`_blitzml_BlitzML_new_logreg_solver`)
+}
+
+BlitzML_new_linear_solver <- function() {
+    .Call(`_blitzml_BlitzML_new_linear_solver`)
 }
 
 BlitzML_new_parameters <- function(params) {
     .Call(`_blitzml_BlitzML_new_parameters`, params)
 }
 
-BlitzML_sparse_linear_solver_compute_max_l1_penalty <- function(xptr_solver, xptr_dataset, xptr_params) {
-    .Call(`_blitzml_BlitzML_sparse_linear_solver_compute_max_l1_penalty`, xptr_solver, xptr_dataset, xptr_params)
+BlitzML_solver_compute_max_l1_penalty <- function(xptr_solver, xptr_dataset, xptr_params) {
+    .Call(`_blitzml_BlitzML_solver_compute_max_l1_penalty`, xptr_solver, xptr_dataset, xptr_params)
 }
 
 BlitzML_solve_problem <- function(xptr_solver, xptr_dataset, xptr_params, result, status_buffer, log_dir) {
