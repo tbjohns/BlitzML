@@ -80,7 +80,7 @@ void BlitzML_set_max_iterations(SEXP xptr_solver, unsigned value) {
 }
 
 // [[Rcpp::export]]
-void BlitzML_set_use_working_sets(SEXP xptr_solver, unsigned value) {
+void BlitzML_set_use_working_sets(SEXP xptr_solver, bool value) {
   Rcpp::XPtr< BlitzML::SparseLinearSolver > solver(xptr_solver);
   solver->set_use_working_sets(value);
 }

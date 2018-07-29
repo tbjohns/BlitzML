@@ -26,8 +26,8 @@ void assert_with_error_message(bool okay, string error_message) {
 #else
     cerr << "Program exited with error: " << error_message << endl;
 #endif
+    throw error_message;
   }
-  throw error_message;
 }
 
 void warn_if(bool condition, std::string message) {

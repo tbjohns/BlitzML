@@ -132,12 +132,12 @@ BEGIN_RCPP
 END_RCPP
 }
 // BlitzML_set_use_working_sets
-void BlitzML_set_use_working_sets(SEXP xptr_solver, unsigned value);
+void BlitzML_set_use_working_sets(SEXP xptr_solver, bool value);
 RcppExport SEXP _blitzml_BlitzML_set_use_working_sets(SEXP xptr_solverSEXP, SEXP valueSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< SEXP >::type xptr_solver(xptr_solverSEXP);
-    Rcpp::traits::input_parameter< unsigned >::type value(valueSEXP);
+    Rcpp::traits::input_parameter< bool >::type value(valueSEXP);
     BlitzML_set_use_working_sets(xptr_solver, value);
     return R_NilValue;
 END_RCPP
