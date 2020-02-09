@@ -8,6 +8,7 @@ BlitzMLLassoRegression = R6::R6Class(
                           lambda_min_fraction = 0.0001,
                           lambda_max_fraction = 0.3,
                           include_bias_term = TRUE,
+                          max_nonzero = Inf,
                           tol = 1e-3,
                           max_time = 60,
                           max_iter = 10000,
@@ -23,11 +24,12 @@ BlitzMLLassoRegression = R6::R6Class(
         is.numeric(tol) &&
         is.numeric(max_time) &&
         is.numeric(max_iter) &&
+        is.numeric(max_nonzero) &&
         is.logical(include_bias_term)
       )
 
       stopifnot(is.numeric(lambda) || identical(lambda, "auto"))
-      if(is.numeric(lambda)) lambda = sort(lambda)
+      if (is.numeric(lambda)) lambda = sort(lambda, decreasing = TRUE)
 
       private$n_lambda = n_lambda[[1]]
       private$lambda_min_fraction = lambda_min_fraction[[1]]
@@ -42,15 +44,16 @@ BlitzMLLassoRegression = R6::R6Class(
                             undefined_param = 0,
                             include_bias_term = as.numeric(include_bias_term),
                             loss_index = encode_loss(private$loss),
-                            loss = private$loss)
+                            loss = private$loss,
+                            max_nonzero = max_nonzero)
       futile.logger::flog.debug("params : %s", paste(names(private$params), private$params, sep = "=", collapse = ", "))
     },
     fit = function(x, y, ...) {
       stopifnot(is.numeric(y))
-      if(inherits(x, "sparseMatrix")) {
+      if (inherits(x, "sparseMatrix")) {
         x = as(x, "dgCMatrix")
       } else {
-        if(! inherits(x, "matrix"))
+        if (!inherits(x, "matrix"))
           stop("'x' should inherit from 'matrix' or 'Matrix::sparseMatrix'")
       }
 
@@ -59,7 +62,7 @@ BlitzMLLassoRegression = R6::R6Class(
 
       # BlitzML requirement - positive classes encoded as 1 and negative as -1
       # FIXME this is for logistic solver only!
-      if(private$loss == "logistic") y = ifelse(y > 0, 1, -1)
+      if (private$loss == "logistic") y = ifelse(y > 0, 1, -1)
 
       BlitzML_set_tolerance(solver, private$tol)
       BlitzML_set_use_working_sets(solver, TRUE)
@@ -74,15 +77,16 @@ BlitzMLLassoRegression = R6::R6Class(
 
       dataset = BlitzML_create_dataset(x, y)
 
-      if(is.null(self$lambda_seq)) {
-        if(identical(private$params$lambda, "auto")) {
+      if (is.null(self$lambda_seq)) {
+        if (identical(private$params$lambda, "auto")) {
           self$lambda_seq = private$generate_lambda_seq(x, y)
         } else {
           self$lambda_seq = private$params$lambda
         }
       }
 
-      res = lapply(self$lambda_seq, function(lambda) {
+      res = list()
+      for (lambda in self$lambda_seq) {
         status_buffer = raw(STATUS_BUFFER_SIZE)
         start = Sys.time()
         params = c(lambda = lambda,
@@ -99,19 +103,26 @@ BlitzMLLassoRegression = R6::R6Class(
         status = rawToChar(status_buffer)
         time_spent =  difftime(Sys.time(), start, "sec")
 
-        if(status == 'Exceeded time limit')
+        if (status == 'Exceeded time limit')
           flog.warn("haven't converged for lambda %f - exceeded time limit of %f sec", lambda, private$max_time)
 
         flog.trace("solved in %f sec for lambda %f, %d non-zero coef (status: '%s')",
                    time_spent, lambda, sum(coefs != 0), status)
 
+        if (sum(coefs != 0) > private$params$max_nonzero) {
+          break()
+        }
         # put bias followed coefficients and convert to sparse matrix (actually vector)
-        as(c(bias, coefs), "CsparseMatrix")
-      })
+        res[[length(res) + 1L]] = c(bias, coefs)
+      }
+      self$lambda_seq = self$lambda_seq[seq_along(res)]
+      cn = paste("lambda=", self$lambda_seq, sep = "")
       res = do.call(cbind, res)
-      colnames(res) = paste("lambda=", self$lambda_seq, sep = "")
+      colnames(res) = cn
+      res = as(res, "CsparseMatrix")
+
       cn = colnames(x)
-      if(is.null(cn))
+      if (is.null(cn))
         cn = paste("V", seq_len(ncol(x)), sep = "")
       rownames(res) = c("bias", cn)
       self$coef = res
@@ -121,18 +132,22 @@ BlitzMLLassoRegression = R6::R6Class(
       # add first dummy column of ones in order to add biases via matrix multiplication
       x = cbind(rep(1, nrow(x)), x)
       res = x %*% self$coef
-      if(private$loss == "logistic") res = sigmoid(res)
+      if (private$loss == "logistic") res = sigmoid(res)
       as.matrix(res)
     },
     cross_validate = function(x, y,
                               fold_id = NULL,
                               n_folds = 4,
                               callbacks = list(auc = blitzml::auc),
+                              lambda = "auto",
                               cores = getOption("mc.cores", parallel::detectCores()),
                               ...) {
 
-      if(is.null(self$lambda_seq) && identical(private$params$lambda, "auto")) {
+      if (identical(lambda, "auto")) {
+        private$params$lambda = lambda
         self$lambda_seq = private$generate_lambda_seq(x, y)
+      } else {
+        self$lambda_seq = lambda
       }
 
       if (.Platform$OS.type != "unix" && cores > 1) {
@@ -142,8 +157,15 @@ BlitzMLLassoRegression = R6::R6Class(
 
       lapply(callbacks, function(f) stopifnot(is.function(f) && length(formals(f)) == 2L))
 
-      if(is.null(fold_id))
-        fold_id = sample.int(n_folds, nrow(x), replace = TRUE)
+      if (is.null(fold_id)) {
+        i_neg = y == -1
+        i_pos = which(!i_neg)
+        i_neg = which(i_neg)
+        fold_id = rep(0, nrow(x))
+        fold_id[i_pos] = sample.int(n_folds, length(i_pos), replace = TRUE)
+        fold_id[i_neg] = sample.int(n_folds, length(i_neg), replace = TRUE)
+      }
+
       folds = unique(fold_id)
 
       res = parallel::mclapply(folds, function(fld) {
@@ -180,12 +202,16 @@ BlitzMLLassoRegression = R6::R6Class(
       # lambda_max = find_max_lambda(x, y, params = c(0, 0, private$params$include_bias_term, private$params$loss_index))
       lambda_max = find_max_lambda(x, y, private$params)
       flog.info("found max lambda: %f", lambda_max)
-      lambda_seq = seq(
-        log10(private$lambda_min_fraction * lambda_max),
-        log10(private$lambda_max_fraction * lambda_max),
-        length.out = private$n_lambda
+      if (lambda_max == 0) {
+        lambda_seq = 0
+      } else {
+        lambda_seq = seq(
+          log10(private$lambda_max_fraction * lambda_max),
+          log10(private$lambda_min_fraction * lambda_max),
+          length.out = private$n_lambda
         )
-      lambda_seq = 10 ** lambda_seq
+        lambda_seq = 10 ** lambda_seq
+      }
       lambda_seq
     },
     params = NULL,
@@ -202,7 +228,7 @@ BlitzMLLassoRegression = R6::R6Class(
 
 BlitzML_create_solver = function(loss) {
   check_loss(loss)
-  switch (loss,
+  switch(loss,
           squared = BlitzML_new_linear_solver(),
           huber = BlitzML_new_solver(),
           logistic = BlitzML_new_logreg_solver(),
@@ -213,7 +239,7 @@ BlitzML_create_solver = function(loss) {
 }
 
 check_loss = function(loss) {
-  if(!(loss %in% IMPLEMENTED_LOSS_FUNCTIONS))
+  if (!(loss %in% IMPLEMENTED_LOSS_FUNCTIONS))
     stop(sprintf("only %s loss supported at the moment", paste(paste("'", IMPLEMENTED_LOSS_FUNCTIONS, "'", sep = ""), collapse = "/")))
   invisible(TRUE)
 }

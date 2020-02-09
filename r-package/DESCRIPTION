@@ -1,7 +1,7 @@
 Package: blitzml
 Type: Package
 Title: Efficient Solver for Linear Models with Various Loss Functions and L1 penalty
-Version: 0.1.0
+Version: 0.1.1
 Authors@R: c(
     person("Tyler", "Johnson", role = c("aut"), comment = "backend C++ solver"),
     person("Dmitriy", "Selivanov", role = c("aut", "cre"), email = "selivanov.dmitriy@gmail.com", comment = "R package")
@@ -21,4 +21,4 @@ Imports:
     futile.logger, 
     data.table
 LinkingTo: Rcpp
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.1

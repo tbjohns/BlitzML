@@ -2,7 +2,7 @@
 #' @importFrom Rcpp sourceCpp
 #' @import methods
 #' @import Matrix
-#' @importFrom futile.logger flog.info flog.debug flog.trace
+#' @importFrom futile.logger flog.info flog.debug flog.trace flog.warn
 
 STATUS_BUFFER_SIZE = 64L
 
