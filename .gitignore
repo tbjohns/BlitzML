@@ -11,5 +11,9 @@ MANIFEST
 docs/_build
 docs/_templates
 docs/*.log
-.DS_Store 
+.DS_Store
 
+.Rproj.user
+*.o
+*.so
+.Rhistory
